@@ -28,7 +28,6 @@ filelock==3.13.1
 fonttools==4.55.0
 frozenlist==1.5.0
 fsspec==2024.10.0
-grpcio==1.48.2
 h5py==3.12.1
 idna==3.7
 imagesize==1.4.1
