@@ -24,6 +24,7 @@ Welcome to MIDAS's documentation!
    extend.md
    acknowledge.md
    citation.md
+   release.md
 
 
 
