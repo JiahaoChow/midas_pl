@@ -8,3 +8,6 @@ teadog*
 *.zip
 *.ipynb
 midas/
+split_mat.py
+train.py
+bin/
