@@ -26,3 +26,4 @@ torchmetrics==1.5.1
 torchvision==0.20.1
 tornado==6.4.1
 tqdm==4.67.0
+recommonmark==0.7.1
