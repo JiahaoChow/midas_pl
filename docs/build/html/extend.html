@@ -1,0 +1,613 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Extending MIDAS to Support More Modalities &#8212; midas 0.1.0 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!-- 
+    this give us a css class that will be invisible only if js is disabled 
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=26a4bc78f4c0ddb94549" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=a746c00c" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=a3416100" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="_static/scripts/fontawesome.js?digest=26a4bc78f4c0ddb94549"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
+
+    <script src="_static/documentation_options.js?v=a1637f0b"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="_static/copybutton.js?v=f281be69"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=887ef09a"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'extend';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="scmidas.utils" href="scmidas.utils.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/midas_small_color.svg" class="logo__image only-light" alt="midas 0.1.0 documentation - Home"/>
+    <img src="_static/midas_small_color.svg" class="logo__image only-dark pst-js-only" alt="midas 0.1.0 documentation - Home"/>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quick_start.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/demo1.html">Tutorials</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="modules.html">API</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
+<li class="toctree-l2"><a class="reference internal" href="scmidas.model.html">scmidas.model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scmidas.data.html">scmidas.data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scmidas.nn.html">scmidas.nn</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scmidas.utils.html">scmidas.utils</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Extending MIDAS to Support More Modalities</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><button class="sidebar-toggle primary-toggle btn btn-sm" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</button></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/extend.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button>
+
+
+<button class="btn btn-sm pst-navbar-icon search-button search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+</button>
+<button class="sidebar-toggle secondary-toggle btn btn-sm" title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</button>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>Extending MIDAS to Support More Modalities</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-our-framework">About Our Framework</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-components-of-midas">Key Components of MIDAS</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#transformation-and-distribution-functions">Transformation and Distribution Functions</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#transformation-functions">Transformation Functions</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#distribution-functions">Distribution Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-extending-the-framework-for-new-modalities">Step 1: Extending the Framework for New Modalities</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-encoder">Data Encoder</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-decoder">Data Decoder</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#batch-indices-encoder-and-decoder">Batch Indices Encoder and Decoder</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reconstruction-loss-weight">Reconstruction Loss Weight</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-register-new-functions">Step 2: Register New Functions</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#registering-new-transformation-functions">Registering New Transformation Functions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#registering-new-distribution-functions">Registering New Distribution Functions</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-register-new-modality">Step 3: Register New Modality</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#call-for-contributions">Call for Contributions</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="extending-midas-to-support-more-modalities">
+<h1>Extending MIDAS to Support More Modalities<a class="headerlink" href="#extending-midas-to-support-more-modalities" title="Link to this heading">#</a></h1>
+<p>MIDAS currently supports the integration of RNA, ADT, and ATAC data. To extend the model to support new modalities, follow the guidelines below.</p>
+<section id="about-our-framework">
+<h2>About Our Framework<a class="headerlink" href="#about-our-framework" title="Link to this heading">#</a></h2>
+<p>The MIDAS model is configured via the <code class="docutils literal notranslate"><span class="pre">scmidas/model_config.toml</span></code> file and is primarily implemented using Multi-Layer Perceptrons (MLP). The framework consists of several key components:</p>
+<section id="key-components-of-midas">
+<h3>Key Components of MIDAS<a class="headerlink" href="#key-components-of-midas" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Data Encoder</strong>: Encodes each modality (as a dictionary) into the means and log-transformed variances of a Gaussian distribution, representing the modality-specific latent features.</p></li>
+<li><p><strong>Data Decoder</strong>: Reconstructs the counts for each modality by using the joint latent features as input.</p></li>
+<li><p><strong>Batch Indices Encoder</strong>: Encodes batch indices for each modality into Gaussian-distributed means and variances.</p></li>
+<li><p><strong>Batch Indices Decoder</strong>: Reconstructs the batch indices for each modality using the joint latent features.</p></li>
+<li><p><strong>Discriminator</strong>: A set of classifiers that categorize each modality’s latents as well as the joint latents. Only the biological part of the latents is used for this classification.</p></li>
+</ol>
+<p>Each of these components uses MLPs as the base architecture, which means that convolutional neural networks (CNNs) or more complex structures are currently not supported (though they can be incorporated if needed).</p>
+</section>
+<section id="transformation-and-distribution-functions">
+<h3>Transformation and Distribution Functions<a class="headerlink" href="#transformation-and-distribution-functions" title="Link to this heading">#</a></h3>
+<p>MIDAS employs a variety of transformation and distribution functions that can be modified or extended for new modalities.</p>
+<section id="transformation-functions">
+<h4>Transformation Functions<a class="headerlink" href="#transformation-functions" title="Link to this heading">#</a></h4>
+<ul class="simple">
+<li><p><strong>binarize</strong></p>
+<ul>
+<li><p><strong>Input Transformation</strong>: Binarize the data</p></li>
+<li><p><strong>Output Transformation</strong>: None</p></li>
+</ul>
+</li>
+<li><p><strong>log1p</strong></p>
+<ul>
+<li><p><strong>Input Transformation</strong>: Apply log1p (log(x + 1)) transformation</p></li>
+<li><p><strong>Output Transformation</strong>: Apply the exponential function (<cite>exp</cite>)</p></li>
+</ul>
+</li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The transformation functions specified during the model configuration (e.g., in the <code class="docutils literal notranslate"><span class="pre">model</span> <span class="pre">=</span> <span class="pre">MIDAS.configure_data_from_dir(task,</span> <span class="pre">transform,</span> <span class="pre">config_name='default'</span></code>) are applied only when retrieving items from the dataset (during the <cite>get_item</cite> step). However, when the data is passed through the encoder (after the initial step) and before the decoder output (just before the final step), both the transformation and its inverse transformation will be applied. This ensures that the data is properly transformed during the forward pass and restored during the decoding process.</p>
+</div>
+</section>
+<section id="distribution-functions">
+<h4>Distribution Functions<a class="headerlink" href="#distribution-functions" title="Link to this heading">#</a></h4>
+<ol class="arabic simple">
+<li><p><strong>POISSON</strong></p>
+<ul class="simple">
+<li><p><strong>Loss Function</strong>: Poisson loss</p></li>
+<li><p><strong>Sampling</strong>: Poisson sampling</p></li>
+<li><p><strong>Activation</strong>: None</p></li>
+</ul>
+</li>
+<li><p><strong>BERNOULLI</strong></p>
+<ul class="simple">
+<li><p><strong>Loss Function</strong>: Cross-entropy</p></li>
+<li><p><strong>Sampling</strong>: None</p></li>
+<li><p><strong>Activation</strong>: Sigmoid</p></li>
+</ul>
+</li>
+</ol>
+<p>The <strong>loss</strong> defines the reconstruction loss function, <strong>sampling</strong> defines how batch-corrected counts are calculated, and <strong>activation</strong> sets the output layer activation for the decoder.</p>
+</section>
+</section>
+</section>
+<section id="step-1-extending-the-framework-for-new-modalities">
+<h2>Step 1: Extending the Framework for New Modalities<a class="headerlink" href="#step-1-extending-the-framework-for-new-modalities" title="Link to this heading">#</a></h2>
+<section id="data-encoder">
+<h3>Data Encoder<a class="headerlink" href="#data-encoder" title="Link to this heading">#</a></h3>
+<p>The encoder transforms data through modality-specific and shared layers to obtain latent representations. You can modify the structure in the <cite>scmidas/model_config.toml</cite> as follows:</p>
+<ol class="arabic">
+<li><p><strong>Transformation Before Encoding</strong>: Set the transformation function for the data before encoding.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">trsf_before_enc_mod</span> <span class="o">=</span> <span class="s1">&#39;log1p&#39;</span>  <span class="c1"># Default transformation</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Dimensionality Reduction Layer</strong>: If the data is split into chunks, define the modality-specific layers for encoding each chunk individually before merging them.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dims_before_enc_mod</span> <span class="o">=</span> <span class="p">[</span><span class="mi">512</span><span class="p">,</span> <span class="mi">128</span><span class="p">]</span>  <span class="c1"># First encode to 512 dimensions, then to 128</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Shared Layer Configuration</strong>: Define the shared layer structure (e.g., <cite>[1024, 128]</cite>).</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dims_shared_enc</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1024</span><span class="p">,</span> <span class="mi">128</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="data-decoder">
+<h3>Data Decoder<a class="headerlink" href="#data-decoder" title="Link to this heading">#</a></h3>
+<p>The decoder reconstructs the original data by decoding latents through shared and modality-specific layers. Configure the shared layers and post-decoders in the <cite>scmidas/model_config.toml</cite> as follows:</p>
+<ol class="arabic">
+<li><p><strong>Shared Layer Setup</strong>: Define the structure for the shared decoder layers.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dims_shared_dec</span> <span class="o">=</span> <span class="p">[</span><span class="mi">128</span><span class="p">,</span> <span class="mi">1024</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Dimensionality Expansion Layer</strong>: Define the dimensionality expansion layers after the shared layers.</p>
+<p>Example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dims_after_dec_mod</span> <span class="o">=</span> <span class="p">[</span><span class="mi">128</span><span class="p">,</span> <span class="mi">512</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+</ol>
+<p>After decoding, the output will be transformed according to the registered transformation functions.</p>
+</section>
+<section id="batch-indices-encoder-and-decoder">
+<h3>Batch Indices Encoder and Decoder<a class="headerlink" href="#batch-indices-encoder-and-decoder" title="Link to this heading">#</a></h3>
+<p>Set up the batch indices encoder and decoder layers in the <code class="docutils literal notranslate"><span class="pre">scmidas/model_config.toml</span></code> as follows:</p>
+<ol class="arabic">
+<li><p><strong>Batch Indices Encoder Setup</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dims_enc_s</span> <span class="o">=</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+<li><p><strong>Batch Indices Decoder Setup</strong>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">dims_dec_s</span> <span class="o">=</span> <span class="p">[</span><span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">]</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="reconstruction-loss-weight">
+<h3>Reconstruction Loss Weight<a class="headerlink" href="#reconstruction-loss-weight" title="Link to this heading">#</a></h3>
+<p>Set the weight for the reconstruction loss function in the <code class="docutils literal notranslate"><span class="pre">scmidas/model_config.toml</span></code> as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">lam_recon_mod</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># Adjust as needed</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="step-2-register-new-functions">
+<h2>Step 2: Register New Functions<a class="headerlink" href="#step-2-register-new-functions" title="Link to this heading">#</a></h2>
+<p>To extend MIDAS with new functionalities, you need to register new transformation and distribution functions.</p>
+<section id="registering-new-transformation-functions">
+<h3>Registering New Transformation Functions<a class="headerlink" href="#registering-new-transformation-functions" title="Link to this heading">#</a></h3>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">TransformRegistry</span></code> to register new transformation functions in the <code class="docutils literal notranslate"><span class="pre">scmidas/nn.py</span></code>, or import the instance as needed:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">TransformRegistry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">inverse_func</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="registering-new-distribution-functions">
+<h3>Registering New Distribution Functions<a class="headerlink" href="#registering-new-distribution-functions" title="Link to this heading">#</a></h3>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">DistributionRegistry</span></code> to register new distribution-related functions in the <code class="docutils literal notranslate"><span class="pre">scmidas/nn.py</span></code>, or import the instance as needed:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">DistributionRegistry</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">loss_fn</span><span class="p">,</span> <span class="n">sampling_fn</span><span class="p">,</span> <span class="n">activate_fn</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="step-3-register-new-modality">
+<h2>Step 3: Register New Modality<a class="headerlink" href="#step-3-register-new-modality" title="Link to this heading">#</a></h2>
+<p>Now you can add the name of new modality in the <code class="docutils literal notranslate"><span class="pre">scmidas/model_config.toml</span></code> as:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">available_mods</span> <span class="o">=</span> <span class="n">available_mods</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;rna&quot;</span><span class="p">,</span> <span class="s2">&quot;adt&quot;</span><span class="p">,</span> <span class="s2">&quot;atac&quot;</span><span class="p">,</span> <span class="s2">&quot;met&quot;</span><span class="p">,</span> <span class="s2">&quot;new_mod&quot;</span><span class="p">]</span>
+</pre></div>
+</div>
+</section>
+<section id="call-for-contributions">
+<h2>Call for Contributions<a class="headerlink" href="#call-for-contributions" title="Link to this heading">#</a></h2>
+<p>If you’ve implemented new features or improvements and would like to contribute to the MIDAS project, we encourage you to submit a <strong>pull request</strong>. We welcome your enhancements and will review them for inclusion in the main repository.</p>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="scmidas.utils.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">previous</p>
+        <p class="prev-next-title">scmidas.utils</p>
+      </div>
+    </a>
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <dialog id="pst-secondary-sidebar-modal"></dialog>
+                <div id="pst-secondary-sidebar" class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#about-our-framework">About Our Framework</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#key-components-of-midas">Key Components of MIDAS</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#transformation-and-distribution-functions">Transformation and Distribution Functions</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#transformation-functions">Transformation Functions</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#distribution-functions">Distribution Functions</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-extending-the-framework-for-new-modalities">Step 1: Extending the Framework for New Modalities</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-encoder">Data Encoder</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#data-decoder">Data Decoder</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#batch-indices-encoder-and-decoder">Batch Indices Encoder and Decoder</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#reconstruction-loss-weight">Reconstruction Loss Weight</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-register-new-functions">Step 2: Register New Functions</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#registering-new-transformation-functions">Registering New Transformation Functions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#registering-new-distribution-functions">Registering New Distribution Functions</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-register-new-modality">Step 3: Register New Modality</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#call-for-contributions">Call for Contributions</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Anonymous
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Anonymous.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549"></script>
+<script defer src="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

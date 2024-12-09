@@ -1,0 +1,10 @@
+data_process/
+figs/
+logs/
+logs2/
+predict/
+saved*
+teadog*
+*.zip
+*.ipynb
+midas/
