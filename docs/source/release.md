@@ -1,6 +1,6 @@
 # Release notes
 
-## v0.1.0 2024-12-6 ( **Significant Update** )
+## v0.1.0 2024-12-10
 
 1. **Improved Performance** : Integrated Lightning to support multi-GPU training, enhancing processing speed.
 2. **Increased Flexibility** :
