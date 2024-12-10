@@ -175,8 +175,8 @@ To monitor the training progress, run the following command in your terminal:
 
 Then, open the URL displayed in your terminal (e.g., `http://localhost:6006`) in a web browser to visualize the training metrics and results.
 
-Multi-GPU Training
-~~~~~~~~~~~~~~~~~~
+Train with Multi-GPU
+~~~~~~~~~~~~~~~~~~~~
 
 To enable training on multiple GPUs, create a `.py` file and modify the `strategy` parameter to `'ddp'` (Distributed Data Parallel):
 

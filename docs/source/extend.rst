@@ -64,7 +64,7 @@ Distribution Functions
 The **loss** defines the reconstruction loss function, **sampling** defines how batch-corrected counts are calculated, and **activation** sets the output layer activation for the decoder.
 
 
-Step 1: Extending the Framework for New Modalities
+Step 1: Extend the Framework for New Modalities
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Data Encoder
@@ -129,7 +129,7 @@ Set the weight for the reconstruction loss function in the ``scmidas/model_confi
 .. code-block:: python
 
    lam_recon_mod = 1  # Adjust as needed
-   
+
 (Optional) Batch Indices Encoder and Decoder
 --------------------------------------------
 
@@ -162,7 +162,7 @@ Use the ``TransformRegistry`` to register new transformation functions in the ``
    TransformRegistry.register(name, func, inverse_func)
 
 
-Registering New Distribution Functions
+Register New Distribution Functions
 --------------------------------------
 
 Use the ``DistributionRegistry`` to register new distribution-related functions in the ``scmidas/nn.py``, or import the instance as needed:
@@ -171,7 +171,7 @@ Use the ``DistributionRegistry`` to register new distribution-related functions 
 
    DistributionRegistry.register(name, loss_fn, sampling_fn, activate_fn)
 
-Step 3: Registering New Modality
+Step 3: Register New Modality
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now you can add the name of new modality in the ``scmidas/model_config.toml`` as:
