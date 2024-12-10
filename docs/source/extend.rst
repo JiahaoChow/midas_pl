@@ -121,6 +121,15 @@ The decoder reconstructs the original data by decoding latents through shared an
 
 After decoding, the output will be transformed according to the registered transformation functions.
 
+Reconstruction Loss Weight
+--------------------------
+
+Set the weight for the reconstruction loss function in the ``scmidas/model_config.toml`` as follows:
+
+.. code-block:: python
+
+   lam_recon_mod = 1  # Adjust as needed
+   
 (Optional) Batch Indices Encoder and Decoder
 --------------------------------------------
 
@@ -137,16 +146,6 @@ Set up the batch indices encoder and decoder layers in the ``scmidas/model_confi
    .. code-block:: python
 
       dims_dec_s = [16, 16]
-   
-
-Reconstruction Loss Weight
---------------------------
-
-Set the weight for the reconstruction loss function in the ``scmidas/model_config.toml`` as follows:
-
-.. code-block:: python
-
-   lam_recon_mod = 1  # Adjust as needed
 
 Step 2: Register New Functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
