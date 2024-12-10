@@ -5,6 +5,6 @@ We selected two batches from each dataset to create a combined dataset with four
  - w1 and w6 from TEA-seq
  - lll_ctrl and dig_stim from DOGMA-seq
 
-Next, we randomly selected 1,000 samples (cells) from each batch, 
+Next, we selected 1,000 samples (cells) from each batch, 
 resulting in a total of 4,000 samples. 
 To construct a mosaic dataset, we intentionally dropped some modalities.
