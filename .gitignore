@@ -1,12 +1,4 @@
-data_process/
-figs/
-logs/
-logs2/
-predict/
-saved*
-teadog*
-*.zip
-midas/
-split_mat.py
-train.py
-bin/
+*
+!docs
+!scmidas
+!teadog_mosaic_8k.zip
