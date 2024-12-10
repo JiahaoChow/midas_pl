@@ -57,7 +57,7 @@ Distribution Functions
 
    - **Loss Function**: Cross-entropy
 
-   - **Sampling**: None
+   - **Sampling**: Bernoulli sampling
 
    - **Activation**: Sigmoid
 
