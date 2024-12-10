@@ -88,7 +88,7 @@ The encoder transforms data through modality-specific and shared layers to obtai
       
       dims_before_enc_mod = [512, 128]  # First encode to 512 dimensions, then to 128
    
-3. **Shared Layer Configuration**: Define the shared layer structure (e.g., `[1024, 128]`).
+3. **(Optional) Shared Layer Configuration**: Define the shared layer structure (e.g., `[1024, 128]`).
 
    Example:
 
@@ -102,7 +102,7 @@ Data Decoder
 
 The decoder reconstructs the original data by decoding latents through shared and modality-specific layers. Configure the shared layers and post-decoders in the `scmidas/model_config.toml` as follows:
 
-1. **Shared Layer Setup**: Define the structure for the shared decoder layers.
+1. **(Optional) Shared Layer Setup**: Define the structure for the shared decoder layers.
 
    Example:
 
@@ -121,8 +121,8 @@ The decoder reconstructs the original data by decoding latents through shared an
 
 After decoding, the output will be transformed according to the registered transformation functions.
 
-Batch Indices Encoder and Decoder
----------------------------------
+(Optional) Batch Indices Encoder and Decoder
+--------------------------------------------
 
 Set up the batch indices encoder and decoder layers in the ``scmidas/model_config.toml`` as follows:
 
@@ -172,14 +172,14 @@ Use the ``DistributionRegistry`` to register new distribution-related functions 
 
    DistributionRegistry.register(name, loss_fn, sampling_fn, activate_fn)
 
-Step 3: Register New Modality
+Step 3: Registering New Modality
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Now you can add the name of new modality in the ``scmidas/model_config.toml`` as:
 
 .. code-block:: python
 
-   available_mods = available_mods = ["rna", "adt", "atac", "mod"]
+   available_mods = ["rna", "adt", "atac", "mod"]
 
 Call for Contributions
 ~~~~~~~~~~~~~~~~~~~~~~
