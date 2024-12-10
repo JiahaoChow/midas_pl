@@ -458,7 +458,14 @@ class MyDistributedSampler(DistributedSampler):
         return math.ceil(max_samples / self.batch_size) * self.n_dataset * self.batch_size
 
 def download_file(url: str, dest_path: Path):
-    """Helper function to download a file from a URL with progress display."""
+    """Helper function to download a file from a URL with progress display.
+    
+    Parameters:
+        url : str
+            URL for data.
+        dest_path : str
+            Path to save.
+    """
     try:
         # Send HTTP GET request
         response = requests.get(url, stream=True)
@@ -482,7 +489,14 @@ def download_file(url: str, dest_path: Path):
         raise
 
 def unzip_file(zip_path: Path, extract_to: Path):
-    """Helper function to unzip a file."""
+    """Helper function to unzip a file.
+
+    Parameters:
+        zip_path : str
+            Path of zip file.
+        extract_to : str
+            Path to save.
+    """
     try:
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(extract_to)
