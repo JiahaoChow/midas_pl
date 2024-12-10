@@ -12,7 +12,8 @@ from typing import List, Tuple, Dict, Union, Any
 import numpy as np
 import torch
 from tqdm import tqdm
-
+import logging
+logging.basicConfig(level=logging.INFO)
 
 def load_csv(filename: str) -> list:
     """
@@ -383,7 +384,7 @@ def load_predicted(
         dict
             Loaded predicted data grouped by the specified method.
     """
-    print("Loading predicted variables ...")
+    logging.info("Loading predicted variables ...")
     dirs = get_pred_dirs(pred_dir, 
                          s_joint, 
                          combs, 
@@ -402,7 +403,7 @@ def load_predicted(
         for variable, variable_dirs in batch_dirs.items():
             data[batch_id][variable] = {}
             for mod, dir_path in variable_dirs.items():
-                print(f"Loading batch {batch_id}: {variable}, {mod}")
+                logging.info(f"Loading batch {batch_id}: {variable}, {mod}")
                 data[batch_id][variable][mod] = []
                 if variable == "z":
                     data[batch_id]["s"][mod] = []
@@ -413,11 +414,11 @@ def load_predicted(
                     if variable == "z":
                         data[batch_id]["s"][mod] += [batch_id] * len(v)
 
-    print("Converting to numpy ...")
+    logging.info("Converting to numpy ...")
     for batch_id, batch_data in data.items():
         for variable, variable_data in batch_data.items():
             for mod, values in variable_data.items():
-                print(f"Converting batch {batch_id}: {variable}, {mod}")
+                logging.info(f"Converting batch {batch_id}: {variable}, {mod}")
                 if variable in ["z", "x_trans", "x_impt", "s", "x", "x_bc"]:
                     data[batch_id][variable][mod] = values
 
@@ -534,7 +535,7 @@ def rmdir(directory: str):
             Path to the directory to remove.
     """
     if os.path.exists(directory):
-        print(f'Removing directory "{directory}"')
+        logging.warning(f'Removing directory "{directory}"')
         shutil.rmtree(directory)
 
 

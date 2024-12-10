@@ -24,7 +24,7 @@ out_trans = "mish"    # Activation function for the output
 dims_shared_enc = [1024, 128]  # Shared encoder structure across all modalities
 dims_shared_dec = [128, 1024]  # Shared decoder structure across all modalities
 
-available_mods = ["rna", "adt", "atac", "met"]  # Supported modalities
+available_mods = ["rna", "adt", "atac"]  # Supported modalities
 
 # RNA modality configuration
 trsf_before_enc_rna = "log1p"      # Apply log1p transformation before encoding. Exponential transformation will be applied after decoding.
@@ -41,12 +41,6 @@ dims_before_enc_atac = [512, 128]  # Independent MLP structure before shared enc
 dims_after_dec_atac = [128, 512]   # Independent MLP structure after shared decoder
 distribution_dec_atac = "BERNOULLI"  # Bernoulli distribution assumption for decoder. Use BCE loss.
 lam_recon_atac = 1                 # Weight for ATAC reconstruction loss
-
-# MET modality configuration
-dims_before_enc_met = [512, 128]   # Independent MLP structure before shared encoder
-dims_after_dec_met = [128, 512]    # Independent MLP structure after shared decoder
-distribution_dec_met = "BERNOULLI" # Bernoulli distribution assumption for decoder. Use BCE loss.
-lam_recon_met = 1                  # Weight for MET reconstruction loss
 
 # Batch-related configuration
 s_drop_rate = 0.1              # Subsample dropout rate

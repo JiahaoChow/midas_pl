@@ -12,12 +12,13 @@ import torch
 from torch import nn
 from torch.utils.data import DataLoader, ConcatDataset, Dataset
 import lightning as L
+import logging
+logging.basicConfig(level=logging.INFO)
 
 # Project-Specific Imports
 from .data import MyDistributedSampler, MultiBatchSampler, MultiModalDataset
 from .utils import *
 from .nn import MLP, Layer1D, distribution_registry, transform_registry
-
 
 class Encoder(nn.Module):
     """
@@ -572,7 +573,6 @@ class VAE(nn.Module):
             modality = key.split("_")[-1]
             if modality in self.dims_x:
                 dims_h[modality] = [sum([self.__dict__[key][-1]] * len(self.dims_x[modality]))]
-
         return dims_h
 
     def gen_real_data(self, 
@@ -831,8 +831,8 @@ class MIDAS(L.LightningModule):
         # Load model configuration from a TOML file
         config_path = os.path.join(os.path.dirname(__file__), "model_config.toml")
         configs = toml.load(config_path).get(config_name, {})
-        print(f"The model is initialized with the configurations from '{config_path}' [{config_name}].")
-        print("Modify this file to change the configurations.")
+        logging.info(f"The model is initialized with the configurations from '{config_path}' [{config_name}].")
+        logging.info("Modify this file to change the configurations.")
 
         # Set class-level attributes
         cls.configs = configs
@@ -860,16 +860,16 @@ class MIDAS(L.LightningModule):
         # Concatenate all datasets
         try:
             dataset = ConcatDataset(self.datalist)
-            print(f"Total number of samples: {len(dataset)} from {len(self.datalist)} datasets.")
+            logging.info(f"Total number of samples: {len(dataset)} from {len(self.datalist)} datasets.")
         except Exception as e:
             raise ValueError("Failed to concatenate datasets. Please check the input datalist.") from e
 
         # Select the appropriate sampler
         if self.sampler_type == "ddp":
-            print("Using Distributed Data Parallel (DDP) sampler.")
+            logging.info("Using Distributed Data Parallel (DDP) sampler.")
             sampler = MyDistributedSampler(dataset, batch_size=self.batch_size, n_max=self.n_max)
         else:
-            print("Using MultiBatchSampler for data loading.")
+            logging.info("Using MultiBatchSampler for data loading.")
             sampler = MultiBatchSampler(dataset, batch_size=self.batch_size, n_max=self.n_max)
 
         # Create the DataLoader
@@ -882,7 +882,7 @@ class MIDAS(L.LightningModule):
                 pin_memory=self.pin_memory,
                 persistent_workers=self.persistent_workers
             )
-            print(f"DataLoader created with batch size {self.batch_size} and {self.num_workers} workers.")
+            logging.info(f"DataLoader created with batch size {self.batch_size} and {self.num_workers} workers.")
         except Exception as e:
             raise RuntimeError("Failed to create DataLoader. Check DataLoader configuration.") from e
 
@@ -1010,7 +1010,7 @@ class MIDAS(L.LightningModule):
         device = next(self.net.parameters()).device
         if translate:
             mod_latent = True
-        print("Predicting ...")
+        logging.info("Predicting ...")
         dirs = get_pred_dirs(pred_dir, 
                              self.s_joint, 
                              self.combs, 
@@ -1026,7 +1026,7 @@ class MIDAS(L.LightningModule):
         mkdirs(dirs, remove_old=False)
         for batch_id, data in enumerate(self.datalist):
             data_loader = DataLoader(data, shuffle=False, batch_size=self.batch_size)
-            print("Processing batch %d: %s" % (batch_id, str(self.combs[batch_id])))
+            logging.info("Processing batch %d: %s" % (batch_id, str(self.combs[batch_id])))
             fname_fmt = get_name_fmt(len(data_loader))+".csv"
             for i, data in enumerate(tqdm(data_loader)):
                 data = convert_tensors_to_cuda(data, device)
@@ -1073,7 +1073,7 @@ class MIDAS(L.LightningModule):
                                                os.path.join(dirs[batch_id]["x_trans"]["_".join(input_mods_sorted) + "_to_" + mod], fname_fmt) % i)
 
         if batch_correct:
-            print("Calculating u_centroid ...")
+            logging.info("Calculating u_centroid ...")
             
             pred = load_predicted(pred_dir, self.s_joint, self.combs, self.mods)
             u = torch.from_numpy(pred["z"]["joint"][:, self.dim_c:])
@@ -1089,10 +1089,10 @@ class MIDAS(L.LightningModule):
             self.net.u_centroid = u_batch_mean_list[dist.argmin()]
             self.net.batch_correction = True
             
-            print("Batch correction ...")
+            logging.info("Batch correction ...")
             for batch_id, data in enumerate(self.datalist):
                 data_loader = DataLoader(data, shuffle=False, batch_size=self.batch_size)
-                print("Processing batch %d: %s" % (batch_id, str(self.combs[batch_id])))
+                logging.info("Processing batch %d: %s" % (batch_id, str(self.combs[batch_id])))
                 fname_fmt = get_name_fmt(len(data_loader))+".csv"
                 
                 for i, data in enumerate(tqdm(data_loader)):
@@ -1119,7 +1119,7 @@ class MIDAS(L.LightningModule):
             
             # Save the checkpoint
             self.save_checkpoint(checkpoint_path)
-            print(f"Checkpoint saved for epoch {self.current_epoch} at '{checkpoint_path}'.")
+            logging.info(f"Checkpoint saved for epoch {self.current_epoch} at '{checkpoint_path}'.")
 
     def on_train_end(self):
         """
@@ -1130,7 +1130,7 @@ class MIDAS(L.LightningModule):
         checkpoint_filename = f"model_epoch{self.current_epoch}_{timestamp}.pt"
         checkpoint_path = os.path.join(self.save_model_path, checkpoint_filename)
         self.save_checkpoint(checkpoint_path)
-        print(f"Checkpoint saved for epoch {self.current_epoch} at '{checkpoint_path}'.")
+        logging.info(f"Checkpoint saved for epoch {self.current_epoch} at '{checkpoint_path}'.")
 
     def save_checkpoint(self, checkpoint_path: str):
         """
@@ -1160,7 +1160,7 @@ class MIDAS(L.LightningModule):
         torch.save(checkpoint_data, checkpoint_path)
 
         # Inform the user of successful save
-        print(f"Checkpoint successfully saved to '{checkpoint_path}'.")
+        logging.info(f"Checkpoint successfully saved to '{checkpoint_path}'.")
 
     def load_checkpoint(self, checkpoint_path: str):
         """
@@ -1186,7 +1186,7 @@ class MIDAS(L.LightningModule):
 
         # Check if optimizers are already initialized
         if not (hasattr(self, 'net_optim') and hasattr(self, 'dsc_optim')):
-            print("Optimizers not initialized. Running `configure_optimizers` to set them up.")
+            logging.warning("Optimizers not initialized. Running `configure_optimizers` to set them up.")
             # Initialize optimizers if they are not already set
             self.net_optim, self.dsc_optim = self.configure_optimizers()
 
@@ -1212,7 +1212,7 @@ class MIDAS(L.LightningModule):
             tuple
                 List of AnnData objects and UMAP figures.
         """
-        print(f"Loading predicted data from: {pred_dir}")
+        logging.info(f"Loading predicted data from: {pred_dir}")
         pred = load_predicted(pred_dir, self.s_joint, self.combs, self.mods)
 
         # Extract biological and technical embeddings and batch labels
@@ -1226,20 +1226,20 @@ class MIDAS(L.LightningModule):
 
         # Generate UMAP for both embeddings
         for index, (embedding, file_name) in enumerate(zip([bio_embedding, tech_embedding], file_names)):
-            print(f"Processing {'biological' if index == 0 else 'technical'} embedding...")
+            logging.info(f"Processing {'biological' if index == 0 else 'technical'} embedding...")
 
             # Create AnnData object for the embedding
             adata = sc.AnnData(embedding)
             adata.obs['batch'] = batch_labels
 
             # Compute nearest neighbors and UMAP
-            print(" - Computing neighbors...")
+            logging.info(" - Computing neighbors...")
             sc.pp.neighbors(adata)
-            print(" - Computing UMAP...")
+            logging.info(" - Computing UMAP...")
             sc.tl.umap(adata)
 
             # Plot UMAP and optionally save the figure
-            print(f" - Generating UMAP plot for {file_name}...")
+            logging.info(f" - Generating UMAP plot for {file_name}...")
             fig = sc.pl.umap(adata, title=file_name.strip(".png"), color="batch", show=False, return_fig=True, **kwargs)
             all_figures.append(fig)
 
@@ -1247,11 +1247,11 @@ class MIDAS(L.LightningModule):
                 fig_save_path = os.path.join(save_dir, "figs", file_name)
                 os.makedirs(os.path.dirname(fig_save_path), exist_ok=True)
                 fig.savefig(fig_save_path)
-                print(f" - UMAP plot saved to: {fig_save_path}")
+                logging.info(f" - UMAP plot saved to: {fig_save_path}")
 
             all_adata.append(adata)
 
-        print("UMAP generation completed.")
+        logging.info("UMAP generation completed.")
         return all_adata, all_figures
     
     def log_losses(self, 
@@ -1734,5 +1734,5 @@ class MIDAS(L.LightningModule):
         mask_values["#Cell"] = [len(dataset) for dataset in datalist]
 
         # Print summary
-        print("Input Summary (Mask Density and Number)")
-        print(mask_values.to_string())
+        logging.info("Input Summary (Mask Density and Number)")
+        logging.info("\n" + mask_values.to_string())

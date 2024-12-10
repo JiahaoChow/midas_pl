@@ -1,5 +1,5 @@
 *
 !docs
 !scmidas
-!demo_data
-!demo_data/*
+!dataset
+!dataset/*

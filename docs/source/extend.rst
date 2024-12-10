@@ -179,7 +179,7 @@ Now you can add the name of new modality in the ``scmidas/model_config.toml`` as
 
 .. code-block:: python
 
-   available_mods = available_mods = ["rna", "adt", "atac", "met", "new_mod"]
+   available_mods = available_mods = ["rna", "adt", "atac", "mod"]
 
 Call for Contributions
 ~~~~~~~~~~~~~~~~~~~~~~

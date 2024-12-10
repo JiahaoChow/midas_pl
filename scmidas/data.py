@@ -5,6 +5,13 @@ import pandas as pd
 import os
 from typing import Iterator, Optional, TypeVar, Any, Dict
 
+import zipfile
+from pathlib import Path
+import requests
+from tqdm import tqdm
+import logging
+logging.basicConfig(level=logging.INFO)
+
 import torch
 import torch.distributed as dist
 from torch.utils.data.distributed import DistributedSampler
@@ -449,3 +456,75 @@ class MyDistributedSampler(DistributedSampler):
         """
         max_samples = min(max(self.all_length), self.n_max)
         return math.ceil(max_samples / self.batch_size) * self.n_dataset * self.batch_size
+
+def download_file(url: str, dest_path: Path):
+    """Helper function to download a file from a URL with progress display."""
+    try:
+        # Send HTTP GET request
+        response = requests.get(url, stream=True)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+
+        # Get the total size of the file from headers
+        total_size = int(response.headers.get('Content-Length', 0))
+        
+        # Open the destination file in write-binary mode
+        with open(dest_path, 'wb') as file:
+            # Use tqdm to display download progress
+            with tqdm(total=total_size, unit='B', unit_scale=True, desc=f"Downloading {dest_path.name}") as pbar:
+                for chunk in response.iter_content(chunk_size=1024):
+                    if chunk:
+                        file.write(chunk)
+                        pbar.update(len(chunk))  # Update progress bar with the downloaded chunk size
+        logging.info(f"Downloaded: {url} to {dest_path}")
+
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error downloading {url}: {e}")
+        raise
+
+def unzip_file(zip_path: Path, extract_to: Path):
+    """Helper function to unzip a file."""
+    try:
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_to)
+        logging.info(f"Unzipped: {zip_path} to {extract_to}")
+    except zipfile.BadZipFile as e:
+        logging.error(f"Error unzipping {zip_path}: {e}")
+        raise
+
+def download_data(name: str, des: str = "./"):
+    """
+    Downloads the specified dataset and extracts it.
+
+    Parameters:
+        name : str
+            Name of the dataset to download (e.g., "teadog_mosaic_4k").
+        des : str
+            Destination path to save the dataset (default is the current directory).
+    """
+    # Set up the destination path
+    des_path = Path(des) / "demo"
+    des_path.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
+
+    # Define dataset-specific URLs
+    if name == "teadog_mosaic_4k":
+        try:
+            # Download and extract the TEADOG mosaic dataset
+            urls = [
+                ("https://drive.usercontent.google.com/download?id=1MQtg5CHV3KDsmbRowiNnggKImYazBpOi&export=download&authuser=0&confirm=t&uuid=840e8dbf-6a9b-407f-89fe-cc5c82debc8a&at=APvzH3omA-S-4W1YkjAlCvyM6EuX:1733823042031", 
+                 des_path / 'teadog_mosaic_4k.zip'),
+            ]
+
+            for url, file_path in urls:
+                download_file(url, file_path)
+                if file_path.suffix == ".zip":
+                    unzip_file(file_path, des_path)
+                    os.remove(file_path)  # Clean up the zip file after extraction
+
+            logging.info("TEADOG mosaic dataset downloaded and extracted successfully.")
+
+        except Exception as e:
+            logging.error(f"An error occurred while downloading the dataset: {e}")
+            raise
+    else:
+        logging.error(f"Dataset '{name}' is not recognized.")
+        raise ValueError(f"Dataset '{name}' not supported.")
