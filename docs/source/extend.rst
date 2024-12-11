@@ -35,12 +35,12 @@ Transformation Functions
 
 - **log1p**
 
-  - **Input Transformation**: Apply log1p (log(x + 1)) transformation
+  - **Input Transformation**: Apply ``log1p`` (log(x + 1)) transformation
 
-  - **Output Transformation**: Apply the exponential function (`exp`)
+  - **Output Transformation**: Apply the exponential function (``exp``)
 
 .. note::
-   The transformation functions specified during the model configuration (e.g., in the ``model = MIDAS.configure_data_from_dir(task, transform, config_name='default'``) are applied only when retrieving items from the dataset (during the `get_item` step). However, when the data is passed through the encoder (after the initial step) and before the decoder output (just before the final step), both the transformation and its inverse transformation will be applied. This ensures that the data is properly transformed during the forward pass and restored during the decoding process.
+   The transformation functions specified during the model configuration (e.g., in the ``model = MIDAS.configure_data_from_dir(task, transform)``) are applied only when retrieving items from the dataset (during the `get_item` step). However, when the data is passed through the encoder (after the initial step) and before the decoder output (just before the final step), both the transformation and its inverse transformation will be applied. This ensures that the data is properly transformed during the forward pass and restored during the decoding process.
 
 Distribution Functions
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -61,7 +61,7 @@ Distribution Functions
 
    - **Activation**: Sigmoid
 
-The **loss** defines the reconstruction loss function, **sampling** defines how batch-corrected counts are calculated, and **activation** sets the output layer activation for the decoder.
+The ``loss`` defines the reconstruction loss function, ``sampling`` defines how batch-corrected counts are calculated, and ``activation`` sets the output layer activation for the decoder.
 
 
 Step 1: Extend the Framework for New Modalities
@@ -70,7 +70,7 @@ Step 1: Extend the Framework for New Modalities
 Data Encoder
 ------------
 
-The encoder transforms data through modality-specific and shared layers to obtain latent representations. You can modify the structure in the `scmidas/model_config.toml` as follows:
+The encoder transforms data through modality-specific and shared layers to obtain latent representations. You can modify the structure in the ``scmidas/model_config.toml`` as follows:
 
 .. tip::
 
@@ -99,7 +99,7 @@ The encoder transforms data through modality-specific and shared layers to obtai
       
       dims_before_enc_mod = [512, 128]  # First encode to 512 dimensions, then to 128
    
-3. **(Optional) Shared Layer Configuration**: Define the shared layer structure (e.g., `[1024, 128]`).
+3. **(Optional) Shared Layer Configuration**: Define the shared layer structure (e.g., ``[1024, 128]``).
 
    Example:
 
@@ -111,7 +111,7 @@ The encoder transforms data through modality-specific and shared layers to obtai
 Data Decoder
 ------------
 
-The decoder reconstructs the original data by decoding latents through shared and modality-specific layers. Configure the shared layers and post-decoders in the `scmidas/model_config.toml` as follows:
+The decoder reconstructs the original data by decoding latents through shared and modality-specific layers. Configure the shared layers and post-decoders in the ``scmidas/model_config.toml`` as follows:
 
 1. **(Optional) Shared Layer Setup**: Define the structure for the shared decoder layers.
 
