@@ -4,10 +4,15 @@
 <img src="docs/source/_static/img/midas_logo_vertical.png" width="400px">
 </div>
 
-
 <p align="center"> MIDAS turns mosaic data into imputed and batch-corrected data to support single-cell multimodal analysis. </p>
 
-Read our documentation at https://scmidas.readthedocs.io/en/latest/. We provide **tutorials** in the documentation.
+<p align="center">
+  Read our paper <a href="https://www.nature.com/articles/s41587-023-02040-y#:~:text=By%20modeling%20the%20single-cell%20mosaic%20data%20generative" target="_blank">Mosaic integration and knowledge transfer of single-cell multimodal data with MIDAS</a>.
+</p>
+
+<p align="center">
+  Read our documentation at <a href="https://scmidas.readthedocs.io/en/latest/" target="_blank">https://scmidas.readthedocs.io/en/latest/</a>.
+</p>
 
 ## Installation
 
@@ -23,12 +28,21 @@ or:
 pip install scmidas
 ```
 
+## 🔥News
+
+> MIDAS now supports:
+>
+> 1. Flexible integration of additional modalities.
+> 2. Flexible configuration of model structure and loss.
+> 3. Support for a wider range of input formats.
+> 4. Integration with Lightning to enable multi-GPU training.
+> 5. Integration with tensorboard to enable visualization of loss.
+
 ## Reproducibility
 
-Refer to https://github.com/labomics/midas/tree/reproducibility.
-
-> [!NOTE] \
-> Available
+<p >
+  Refer to <a href="https://scmidas.readthedocs.io/en/latest/" target="_blank">https://github.com/labomics/midas/tree/reproducibility/</a>.
+</p>
 
 ## Citation
 
