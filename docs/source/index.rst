@@ -22,8 +22,6 @@ Welcome to MIDAS's documentation!
    ./tutorials/demo1.ipynb
    modules.rst
    extend.md
-   acknowledge.md
-   citation.md
    release.md
 
 
