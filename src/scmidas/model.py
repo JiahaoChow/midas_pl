@@ -68,7 +68,7 @@ class Encoder(nn.Module):
             setattr(self, key, value)
 
         # Extract transformations to apply before encoding
-        self.trsf_before_enc = filter_keys(kwargs, "trsf_before_enc")
+        self.trsf_before_enc = filter_keys(kwargs, 'trsf_before_enc')
 
         # Shared encoder across all modalities
         shared_encoder = MLP(
@@ -86,7 +86,7 @@ class Encoder(nn.Module):
             # If multiple input dimensions, create pre-encoding layers
             if len(input_dims) > 1:
                 pre_encoders = nn.ModuleList([
-                    MLP([dim] + kwargs[f"dims_before_enc_{modality}"], hid_norm=self.norm, hid_drop=self.drop)
+                    MLP([dim] + kwargs[f'dims_before_enc_{modality}'], hid_norm=self.norm, hid_drop=self.drop)
                     for dim in input_dims
                 ])
                 self.pre_encoders[modality] = pre_encoders
@@ -214,7 +214,7 @@ class Decoder(nn.Module):
             # Modality-specific post-decoding layers
             if len(output_dims) > 1:
                 post_decoders = nn.ModuleList([
-                    MLP(kwargs[f"dims_after_dec_{modality}"] + [dim], 
+                    MLP(kwargs[f'dims_after_dec_{modality}'] + [dim], 
                         hid_norm=self.norm, hid_drop=self.drop)
                     for dim in output_dims
                 ])
@@ -254,7 +254,7 @@ class Decoder(nn.Module):
         for modality, post_decoders in self.post_decoders.items():
             # Apply pre-concatenation layer
             processed_output = self.before_concat[modality](data_dict[modality])
-            batches = processed_output.split(self.__dict__[f"dims_after_dec_{modality}"][0], dim=1)
+            batches = processed_output.split(self.__dict__[f'dims_after_dec_{modality}'][0], dim=1)
 
             # Apply modality-specific post-decoders
             data_dict[modality] = torch.cat(
@@ -264,7 +264,7 @@ class Decoder(nn.Module):
 
         # Apply activation functions based on distribution
         for modality, output in data_dict.items():
-            distribution = self.__dict__[f"distribution_dec_{modality}"]
+            distribution = self.__dict__[f'distribution_dec_{modality}']
             activation_fn = distribution_registry.get_activate(distribution)
             data_dict[modality] = activation_fn(output)
 
@@ -397,13 +397,13 @@ class VAE(nn.Module):
         self.available_mods = set(self.dims_x.keys())
         self.dim_z = self.dim_c + self.dim_u
         self.dims_h = self.get_dim_h()
-        self.n_batches = dims_s["joint"]
+        self.n_batches = dims_s['joint']
 
         # Initialize modules
         self.encoder = Encoder(self.dims_x, self.dims_h, self.dim_z, self.norm, self.out_trans, self.drop,
-                               **filter_keys(self.__dict__, "_enc"))
+                               **filter_keys(self.__dict__, '_enc'))
         self.decoder = Decoder(self.dims_x, self.dims_h, self.dim_z, self.norm, self.out_trans, self.drop,
-                               **filter_keys(self.__dict__, "_dec"))
+                               **filter_keys(self.__dict__, '_dec'))
         self.s_encoder = S_Encoder(self.n_batches, self.dims_enc_s, self.dim_z, self.norm, self.drop)
         self.s_decoder = S_Decoder(self.n_batches, self.dims_dec_s, self.dim_u, self.norm, self.drop)
 
@@ -421,9 +421,9 @@ class VAE(nn.Module):
         Parameters:
             data : dict
                 Input data dictionary containing:
-                - "x": Dict[str, torch.Tensor], modality-specific input data.
-                - "e": Dict[str, torch.Tensor], modality-specific masks.
-                - "s" (optional): torch.Tensor, dimensions of the output classes for each modality.
+                - 'x': Dict[str, torch.Tensor], modality-specific input data.
+                - 'e': Dict[str, torch.Tensor], modality-specific masks.
+                - 's' (optional): torch.Tensor, dimensions of the output classes for each modality.
 
         Returns:
             Tuple:
@@ -437,15 +437,15 @@ class VAE(nn.Module):
                 - z_uni (dict): Unified latent variables for each modality.
                 - c_all (dict): Modality-specific Biological information variables.
         """
-        x = data["x"]
-        e = data["e"]
+        x = data['x']
+        e = data['e']
         s = None
 
         # Handle batch-specific information. See https://github.com/labomics/midas/issues/12.
-        if not self.drop_s and "s" in data:
+        if not self.drop_s and 's' in data:
             s_drop_rate = self.s_drop_rate if self.training else 0
             if torch.rand([]).item() < 1 - s_drop_rate:
-                s = data["s"]
+                s = data['s']
 
         # Encode data
         z_x_mu, z_x_logvar = self.encoder(x, e)
@@ -489,7 +489,7 @@ class VAE(nn.Module):
                 - List[torch.Tensor]: Log-variance of batch indices latent variables.
         """
         if s is not None:
-            z_s_mu, z_s_logvar = self.s_encoder(s["joint"]).split(self.dim_z, dim=1)
+            z_s_mu, z_s_logvar = self.s_encoder(s['joint']).split(self.dim_z, dim=1)
             return [z_s_mu], [z_s_logvar]
         return [], []
 
@@ -555,7 +555,7 @@ class VAE(nn.Module):
             c_all[modality] = z_uni[modality][:, :self.dim_c]
 
         # Add joint representation
-        c_all["joint"] = c
+        c_all['joint'] = c
         return z_uni, c_all
 
     def get_dim_h(self) -> Dict[str, List[int]]:
@@ -569,8 +569,8 @@ class VAE(nn.Module):
         dims_h = self.dims_x.copy()
 
         # Adjust dimensions based on pre-encoding layers
-        for key in filter_keys(self.__dict__, "dims_before_enc_"):
-            modality = key.split("_")[-1]
+        for key in filter_keys(self.__dict__, 'dims_before_enc_'):
+            modality = key.split('_')[-1]
             if modality in self.dims_x:
                 dims_h[modality] = [sum([self.__dict__[key][-1]] * len(self.dims_x[modality]))]
         return dims_h
@@ -594,12 +594,12 @@ class VAE(nn.Module):
         x_r = {}
         for modality, tensor in x_r_pre.items():
             # Apply inverse transformations if needed
-            if f"trsf_before_enc_{modality}" in self.__dict__:
-                tensor = reverse_trsf(self.__dict__[f"trsf_before_enc_{modality}"].split("_")[-1], tensor)
+            if f'trsf_before_enc_{modality}' in self.__dict__:
+                tensor = reverse_trsf(self.__dict__[f'trsf_before_enc_{modality}'].split('_')[-1], tensor)
 
             # Apply sampling or directly return the data
             x_r[modality] = self.sample(
-                self.__dict__[f"distribution_dec_{modality}"].split("_")[-1], tensor, sampling)
+                self.__dict__[f'distribution_dec_{modality}'].split('_')[-1], tensor, sampling)
 
         return x_r
 
@@ -697,8 +697,8 @@ class Discriminator(nn.Module):
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-        # Combine modality keys with "joint" modality
-        self.modalities = list(self.dims_x.keys()) + ["joint"]
+        # Combine modality keys with 'joint' modality
+        self.modalities = list(self.dims_x.keys()) + ['joint']
 
         # Create predictors for each modality
         self.predictors = nn.ModuleDict({
@@ -752,7 +752,7 @@ class Discriminator(nn.Module):
         )
 
         # Normalize the total loss by the batch size of the joint modality
-        batch_size = predictions["joint"].size(0)
+        batch_size = predictions['joint'].size(0)
         return total_loss / batch_size
     
 
@@ -795,9 +795,9 @@ class MIDAS(L.LightningModule):
         combs: List[List[str]], 
         batch_size: int = 256, 
         n_save:int = 500, 
-        save_model_path: str = "./saved_models/", 
+        save_model_path: str = './saved_models/', 
         sampler_type:str = 'auto', 
-        config_name: str = "default"
+        config_name: str = 'default'
     ):
         """
         Configure the data and model parameters for training.
@@ -818,21 +818,21 @@ class MIDAS(L.LightningModule):
             n_save : int, optional
                 Interval (in epochs) for saving model checkpoints, by default 500.
             save_model_path : str, optional
-                Directory path for saving model checkpoints, by default "./saved_models/".
+                Directory path for saving model checkpoints, by default './saved_models/'.
             sampler_type : str, optional
-                Type of sampler to use, by default 'auto'. For "ddp", use distributed sampler.
+                Type of sampler to use, by default 'auto'. For 'ddp', use distributed sampler.
             config_name : str, optional
-                Name of the configuration to load from the configuration file, by default "default".
+                Name of the configuration to load from the configuration file, by default 'default'.
 
         Returns:
             cls
                 Returns the configured class instance.
         """
         # Load model configuration from a TOML file
-        config_path = os.path.join(os.path.dirname(__file__), "model_config.toml")
+        config_path = os.path.join(os.path.dirname(__file__), 'model_config.toml')
         configs = toml.load(config_path).get(config_name, {})
-        logging.info(f"The model is initialized with the configurations from '{config_path}' [{config_name}].")
-        logging.info("Modify this file to change the configurations.")
+        logging.info(f'The model is initialized with the configurations from "{config_path}" [{config_name}].')
+        logging.info('Modify this file to change the configurations.')
 
         # Set class-level attributes
         cls.configs = configs
@@ -860,16 +860,16 @@ class MIDAS(L.LightningModule):
         # Concatenate all datasets
         try:
             dataset = ConcatDataset(self.datalist)
-            logging.info(f"Total number of samples: {len(dataset)} from {len(self.datalist)} datasets.")
+            logging.info(f'Total number of samples: {len(dataset)} from {len(self.datalist)} datasets.')
         except Exception as e:
-            raise ValueError("Failed to concatenate datasets. Please check the input datalist.") from e
+            raise ValueError('Failed to concatenate datasets. Please check the input datalist.') from e
 
         # Select the appropriate sampler
-        if self.sampler_type == "ddp":
-            logging.info("Using Distributed Data Parallel (DDP) sampler.")
+        if self.sampler_type == 'ddp':
+            logging.info('Using Distributed Data Parallel (DDP) sampler.')
             sampler = MyDistributedSampler(dataset, batch_size=self.batch_size, n_max=self.n_max)
         else:
-            logging.info("Using MultiBatchSampler for data loading.")
+            logging.info('Using MultiBatchSampler for data loading.')
             sampler = MultiBatchSampler(dataset, batch_size=self.batch_size, n_max=self.n_max)
 
         # Create the DataLoader
@@ -882,9 +882,9 @@ class MIDAS(L.LightningModule):
                 pin_memory=self.pin_memory,
                 persistent_workers=self.persistent_workers
             )
-            logging.info(f"DataLoader created with batch size {self.batch_size} and {self.num_workers} workers.")
+            logging.info(f'DataLoader created with batch size {self.batch_size} and {self.num_workers} workers.')
         except Exception as e:
-            raise RuntimeError("Failed to create DataLoader. Check DataLoader configuration.") from e
+            raise RuntimeError('Failed to create DataLoader. Check DataLoader configuration.') from e
 
         return train_loader
     
@@ -919,14 +919,14 @@ class MIDAS(L.LightningModule):
         """
         # Forward pass through the VAE
         x_r_pre, s_r_pre, z_mu, z_logvar, z, c, u, z_uni, c_all = self.net(batch)
-        c_all["joint"] = c
+        c_all['joint'] = c
 
         # Compute reconstruction loss
         recon_loss, recon_dict = self.calc_recon_loss(
-            batch["x"], batch["s"]["joint"], batch["e"], 
+            batch['x'], batch['s']['joint'], batch['e'], 
             x_r_pre, s_r_pre,
-            filter_keys(self.__dict__, "distribution_dec_"), 
-            filter_keys(self.__dict__, "lam_recon_")
+            filter_keys(self.__dict__, 'distribution_dec_'), 
+            filter_keys(self.__dict__, 'lam_recon_')
         )
         recon_loss *= self.lam_recon
 
@@ -943,11 +943,11 @@ class MIDAS(L.LightningModule):
 
         # Train discriminator for n_iter_disc iterations
         for _ in range(self.n_iter_disc):
-            self.train_discriminator(c_all, batch["s"])
+            self.train_discriminator(c_all, batch['s'])
 
         # Compute adversarial loss for the VAE
         s_pred = self.dsc(c_all)
-        loss_dsc = self.calc_dsc_loss(s_pred, batch["s"]) * self.lam_dsc
+        loss_dsc = self.calc_dsc_loss(s_pred, batch['s']) * self.lam_dsc
         loss_net = loss_net - loss_dsc * self.lam_adv
     
         # Update VAE model
@@ -1010,7 +1010,7 @@ class MIDAS(L.LightningModule):
         device = next(self.net.parameters()).device
         if translate:
             mod_latent = True
-        logging.info("Predicting ...")
+        logging.info('Predicting ...')
         dirs = get_pred_dirs(pred_dir, 
                              self.s_joint, 
                              self.combs, 
@@ -1026,58 +1026,58 @@ class MIDAS(L.LightningModule):
         mkdirs(dirs, remove_old=False)
         for batch_id, data in enumerate(self.datalist):
             data_loader = DataLoader(data, shuffle=False, batch_size=self.batch_size)
-            logging.info("Processing batch %d: %s" % (batch_id, str(self.combs[batch_id])))
-            fname_fmt = get_name_fmt(len(data_loader))+".csv"
+            logging.info('Processing batch %d: %s' % (batch_id, str(self.combs[batch_id])))
+            fname_fmt = get_name_fmt(len(data_loader))+'.csv'
             for i, data in enumerate(tqdm(data_loader)):
                 data = convert_tensors_to_cuda(data, device)
                 # conditioned on all observed modalities
                 if joint_latent:
                     x_r_pre, _, _, _, z, _, _, *_ = self.net(data)  # N * K
-                    save_tensor_to_csv(z, os.path.join(dirs[batch_id]["z"]["joint"], fname_fmt) % i)
+                    save_tensor_to_csv(z, os.path.join(dirs[batch_id]['z']['joint'], fname_fmt) % i)
                 if impute:
                     x_r = self.net.gen_real_data(x_r_pre, sampling=False)
                     for m in self.mods:
-                        save_tensor_to_csv(x_r[m], os.path.join(dirs[batch_id]["x_impt"][m], fname_fmt) % i)
+                        save_tensor_to_csv(x_r[m], os.path.join(dirs[batch_id]['x_impt'][m], fname_fmt) % i)
                 if input:  # save the input
                     for m in self.combs[batch_id]:
-                        save_tensor_to_csv(data["x"][m], os.path.join(dirs[batch_id]["x"][m], fname_fmt) % i)
+                        save_tensor_to_csv(data['x'][m], os.path.join(dirs[batch_id]['x'][m], fname_fmt) % i)
 
                 # conditioned on each individual modalities
                 if mod_latent:
-                    for m in data["x"].keys():
+                    for m in data['x'].keys():
                         input_data = {
-                            "x": {m: data["x"][m]},
-                            "s": data["s"], 
-                            "e": {}
+                            'x': {m: data['x'][m]},
+                            's': data['s'], 
+                            'e': {}
                         }
-                        if m in data["e"].keys():
-                            input_data["e"][m] = data["e"][m]
+                        if m in data['e'].keys():
+                            input_data['e'][m] = data['e'][m]
                         x_r_pre, _, _, _, z, c, u, *_ = self.net(input_data)  # N * K
-                        save_tensor_to_csv(z, os.path.join(dirs[batch_id]["z"][m], fname_fmt) % i)
+                        save_tensor_to_csv(z, os.path.join(dirs[batch_id]['z'][m], fname_fmt) % i)
                 if translate: # double to single
                     all_combinations = generate_all_combinations(self.mods)
                     for input_mods, output_mods in all_combinations:
                         input_mods_sorted = sorted(input_mods)
                         input_data = {
-                            "x": {m: data["x"][m] for m in input_mods_sorted if m in data["x"]},
-                            "s": data["s"], 
-                            "e": {}
+                            'x': {m: data['x'][m] for m in input_mods_sorted if m in data['x']},
+                            's': data['s'], 
+                            'e': {}
                         }
                         for m in input_mods_sorted:
-                            if m in data["e"].keys():
-                                input_data["e"][m] = data["e"][m]
+                            if m in data['e'].keys():
+                                input_data['e'][m] = data['e'][m]
                         x_r_pre, *_ = self.net(input_data)  # N * K
                         x_r = self.net.gen_real_data(x_r_pre, sampling=False)
                         for mod in output_mods:
                             save_tensor_to_csv(x_r[mod], 
-                                               os.path.join(dirs[batch_id]["x_trans"]["_".join(input_mods_sorted) + "_to_" + mod], fname_fmt) % i)
+                                               os.path.join(dirs[batch_id]['x_trans']['_'.join(input_mods_sorted) + '_to_' + mod], fname_fmt) % i)
 
         if batch_correct:
-            logging.info("Calculating u_centroid ...")
+            logging.info('Calculating u_centroid ...')
             
             pred = load_predicted(pred_dir, self.s_joint, self.combs, self.mods)
-            u = torch.from_numpy(pred["z"]["joint"][:, self.dim_c:])
-            s = torch.from_numpy(pred["s"]["joint"])
+            u = torch.from_numpy(pred['z']['joint'][:, self.dim_c:])
+            s = torch.from_numpy(pred['s']['joint'])
 
             u_mean = u.mean(dim=0, keepdim=True)
             u_batch_mean_list = []
@@ -1089,18 +1089,18 @@ class MIDAS(L.LightningModule):
             self.net.u_centroid = u_batch_mean_list[dist.argmin()]
             self.net.batch_correction = True
             
-            logging.info("Batch correction ...")
+            logging.info('Batch correction ...')
             for batch_id, data in enumerate(self.datalist):
                 data_loader = DataLoader(data, shuffle=False, batch_size=self.batch_size)
-                logging.info("Processing batch %d: %s" % (batch_id, str(self.combs[batch_id])))
-                fname_fmt = get_name_fmt(len(data_loader))+".csv"
+                logging.info('Processing batch %d: %s' % (batch_id, str(self.combs[batch_id])))
+                fname_fmt = get_name_fmt(len(data_loader))+'.csv'
                 
                 for i, data in enumerate(tqdm(data_loader)):
                     data = convert_tensors_to_cuda(data, device)
                     x_r_pre, *_ = self.net(data)
                     x_r = self.net.gen_real_data(x_r_pre, sampling=True)
                     for m in self.mods:
-                        save_tensor_to_csv(x_r[m], os.path.join(dirs[batch_id]["x_bc"][m], fname_fmt) % i)
+                        save_tensor_to_csv(x_r[m], os.path.join(dirs[batch_id]['x_bc'][m], fname_fmt) % i)
 
     def on_train_epoch_end(self):
         """
@@ -1111,26 +1111,26 @@ class MIDAS(L.LightningModule):
             os.makedirs(self.save_model_path, exist_ok=True)
             
             # Get the current timestamp
-            timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+            timestamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
 
             # Generate a descriptive checkpoint filename
-            checkpoint_filename = f"model_epoch{self.current_epoch}_{timestamp}.pt"
+            checkpoint_filename = f'model_epoch{self.current_epoch}_{timestamp}.pt'
             checkpoint_path = os.path.join(self.save_model_path, checkpoint_filename)
             
             # Save the checkpoint
             self.save_checkpoint(checkpoint_path)
-            logging.info(f"Checkpoint saved for epoch {self.current_epoch} at '{checkpoint_path}'.")
+            logging.info(f'Checkpoint saved for epoch "{self.current_epoch}" at "{checkpoint_path}".')
 
     def on_train_end(self):
         """
         Save the final model checkpoint at the end of training.
         """
         os.makedirs(self.save_model_path, exist_ok=True)
-        timestamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        checkpoint_filename = f"model_epoch{self.current_epoch}_{timestamp}.pt"
+        timestamp = datetime.datetime.now().strftime('%Y%m%d-%H%M%S')
+        checkpoint_filename = f'model_epoch{self.current_epoch}_{timestamp}.pt'
         checkpoint_path = os.path.join(self.save_model_path, checkpoint_filename)
         self.save_checkpoint(checkpoint_path)
-        logging.info(f"Checkpoint saved for epoch {self.current_epoch} at '{checkpoint_path}'.")
+        logging.info(f'Checkpoint saved for epoch "{self.current_epoch}" at {checkpoint_path}".')
 
     def save_checkpoint(self, checkpoint_path: str):
         """
@@ -1146,21 +1146,21 @@ class MIDAS(L.LightningModule):
         """
         # Validate the output path
         if not checkpoint_path or not isinstance(checkpoint_path, str):
-            raise ValueError("Invalid checkpoint path. Please provide a valid string.")
+            raise ValueError('Invalid checkpoint path. Please provide a valid string.')
 
         # Create a state dictionary with model and optimizer states
         checkpoint_data = {
-            "net": self.net.state_dict(),          # State dictionary of the main model
-            "dsc": self.dsc.state_dict(),          # State dictionary of the discriminator
-            "optim_net": self.net_optim.state_dict(),  # State dictionary of the main optimizer
-            "optim_dsc": self.dsc_optim.state_dict()   # State dictionary of the discriminator optimizer
+            'net': self.net.state_dict(),          # State dictionary of the main model
+            'dsc': self.dsc.state_dict(),          # State dictionary of the discriminator
+            'optim_net': self.net_optim.state_dict(),  # State dictionary of the main optimizer
+            'optim_dsc': self.dsc_optim.state_dict()   # State dictionary of the discriminator optimizer
         }
 
         # Save the state dictionary to the specified path
         torch.save(checkpoint_data, checkpoint_path)
 
         # Inform the user of successful save
-        logging.info(f"Checkpoint successfully saved to '{checkpoint_path}'.")
+        logging.info(f'Checkpoint successfully saved to "{checkpoint_path}".')
 
     def load_checkpoint(self, checkpoint_path: str):
         """
@@ -1175,26 +1175,26 @@ class MIDAS(L.LightningModule):
                 If the provided checkpoint path does not exist.
         """
         # Verify the checkpoint path exists
-        assert os.path.exists(checkpoint_path), f"Checkpoint path '{checkpoint_path}' does not exist."
+        assert os.path.exists(checkpoint_path), f'Checkpoint path "{checkpoint_path}" does not exist.'
 
         # Load the checkpoint file
         checkpoint_data = torch.load(checkpoint_path)
 
         # Load the model state dictionaries
-        self.net.load_state_dict(checkpoint_data["net"])
-        self.dsc.load_state_dict(checkpoint_data["dsc"])
+        self.net.load_state_dict(checkpoint_data['net'])
+        self.dsc.load_state_dict(checkpoint_data['dsc'])
 
         # Check if optimizers are already initialized
         if not (hasattr(self, 'net_optim') and hasattr(self, 'dsc_optim')):
-            logging.warning("Optimizers not initialized. Running `configure_optimizers` to set them up.")
+            logging.warning('Optimizers not initialized. Running `configure_optimizers` to set them up.')
             # Initialize optimizers if they are not already set
             self.net_optim, self.dsc_optim = self.configure_optimizers()
 
         # Load the optimizer state dictionaries
-        self.net_optim.load_state_dict(checkpoint_data["optim_net"])
-        self.dsc_optim.load_state_dict(checkpoint_data["optim_dsc"])
+        self.net_optim.load_state_dict(checkpoint_data['optim_net'])
+        self.dsc_optim.load_state_dict(checkpoint_data['optim_dsc'])
 
-    def get_emb_umap(self, pred_dir: str, save_dir=".", save_fig=True, **kwargs):
+    def get_emb_umap(self, pred_dir: str, save_dir='.', save_fig=True, **kwargs):
         """
         Generate UMAP embeddings for biological (c) and technical (u) latent variables.
 
@@ -1202,7 +1202,7 @@ class MIDAS(L.LightningModule):
             pred_dir : str
                 Directory containing predicted data.
             save_dir : str, optional
-                Directory to save UMAP plots, by default ".".
+                Directory to save UMAP plots, by default '.'.
             save_fig : bool, optional
                 Whether to save the UMAP figures, by default True.
             kwargs : dict
@@ -1212,46 +1212,46 @@ class MIDAS(L.LightningModule):
             tuple
                 List of AnnData objects and UMAP figures.
         """
-        logging.info(f"Loading predicted data from: {pred_dir}")
+        logging.info(f'Loading predicted data from: {pred_dir}')
         pred = load_predicted(pred_dir, self.s_joint, self.combs, self.mods)
 
         # Extract biological and technical embeddings and batch labels
-        bio_embedding = pred["z"]["joint"][:, :self.dim_c]  # Biological embedding
-        tech_embedding = pred["z"]["joint"][:, self.dim_c:]  # Technical embedding
-        batch_labels = pred["s"]["joint"].astype("int").astype("str")  # Batch labels
+        bio_embedding = pred['z']['joint'][:, :self.dim_c]  # Biological embedding
+        tech_embedding = pred['z']['joint'][:, self.dim_c:]  # Technical embedding
+        batch_labels = pred['s']['joint'].astype('int').astype('str')  # Batch labels
 
         all_adata = []  # List to store AnnData objects
         all_figures = []  # List to store UMAP figures
-        file_names = ["biological_embedding.png", "technical_embedding.png"]  # File names for UMAP plots
+        file_names = ['biological_embedding.png', 'technical_embedding.png']  # File names for UMAP plots
 
         # Generate UMAP for both embeddings
         for index, (embedding, file_name) in enumerate(zip([bio_embedding, tech_embedding], file_names)):
-            logging.info(f"Processing {'biological' if index == 0 else 'technical'} embedding...")
+            logging.info(f'Processing {'biological' if index == 0 else 'technical'} embedding...')
 
             # Create AnnData object for the embedding
             adata = sc.AnnData(embedding)
             adata.obs['batch'] = batch_labels
 
             # Compute nearest neighbors and UMAP
-            logging.info(" - Computing neighbors...")
+            logging.info(' - Computing neighbors...')
             sc.pp.neighbors(adata)
-            logging.info(" - Computing UMAP...")
+            logging.info(' - Computing UMAP...')
             sc.tl.umap(adata)
 
             # Plot UMAP and optionally save the figure
-            logging.info(f" - Generating UMAP plot for {file_name}...")
-            fig = sc.pl.umap(adata, title=file_name.strip(".png"), color="batch", show=False, return_fig=True, **kwargs)
+            logging.info(f' - Generating UMAP plot for {file_name}...')
+            fig = sc.pl.umap(adata, title=file_name.strip('.png'), color='batch', show=False, return_fig=True, **kwargs)
             all_figures.append(fig)
 
             if save_fig:
-                fig_save_path = os.path.join(save_dir, "figs", file_name)
+                fig_save_path = os.path.join(save_dir, 'figs', file_name)
                 os.makedirs(os.path.dirname(fig_save_path), exist_ok=True)
                 fig.savefig(fig_save_path)
-                logging.info(f" - UMAP plot saved to: {fig_save_path}")
+                logging.info(f' - UMAP plot saved to: {fig_save_path}')
 
             all_adata.append(adata)
 
-        logging.info("UMAP generation completed.")
+        logging.info('UMAP generation completed.')
         return all_adata, all_figures
     
     def log_losses(self, 
@@ -1279,11 +1279,11 @@ class MIDAS(L.LightningModule):
         """
         self.log_dict(
             {
-                "loss_/recon_loss": recon_loss,
-                "loss_/kld_loss": kld_loss,
-                "loss_/consistency_loss": consistency_loss,
-                "loss/net": loss_net,
-                "loss/dsc":loss_dsc
+                'loss_/recon_loss': recon_loss,
+                'loss_/kld_loss': kld_loss,
+                'loss_/consistency_loss': consistency_loss,
+                'loss/net': loss_net,
+                'loss/dsc':loss_dsc
             },
             prog_bar=True,
             on_epoch=True,
@@ -1339,7 +1339,7 @@ class MIDAS(L.LightningModule):
             loss[modality] = cross_entropy_loss(pred[modality], true[modality].squeeze(1))
 
         # Normalize total loss by batch size
-        total_loss = sum(loss.values()) / pred["joint"].size(0)
+        total_loss = sum(loss.values()) / pred['joint'].size(0)
         return total_loss
     
     @staticmethod
@@ -1465,26 +1465,26 @@ class MIDAS(L.LightningModule):
         # Compute reconstruction loss for each modality
         for modality, x_original in x.items():
             # Get the appropriate loss function based on the modality's decoder distribution
-            loss_fn = distribution_registry.get_loss(dist[f"distribution_dec_{modality}"])
+            loss_fn = distribution_registry.get_loss(dist[f'distribution_dec_{modality}'])
 
             # Check if there is an event-specific mask for the modality
             if modality in e:
                 # Apply event-specific mask to the reconstruction loss
-                losses[f"recon_loss/{modality}"] = (
+                losses[f'recon_loss/{modality}'] = (
                     loss_fn(x_r_pre[modality], x_original) * e[modality]
-                ).sum() * lam[f"lam_recon_{modality}"]
+                ).sum() * lam[f'lam_recon_{modality}']
             else:
                 # Compute the reconstruction loss without a mask
-                losses[f"recon_loss/{modality}"] = (
+                losses[f'recon_loss/{modality}'] = (
                     loss_fn(x_r_pre[modality], x_original)
-                ).sum() * lam[f"lam_recon_{modality}"]
+                ).sum() * lam[f'lam_recon_{modality}']
 
         # Compute reconstruction loss for batch labels, if provided
         if s_r_pre is not None:
             # Use cross-entropy loss for batch label reconstruction
-            losses["recon_loss/s"] = (
-                distribution_registry.get_loss("CE")(s_r_pre, s.squeeze(1))
-            ).sum() * lam["lam_recon_s"]
+            losses['recon_loss/s'] = (
+                distribution_registry.get_loss('CE')(s_r_pre, s.squeeze(1))
+            ).sum() * lam['lam_recon_s']
 
         # Normalize total loss by the batch size
         total_loss = sum(losses.values()) / s.size(0)
@@ -1540,32 +1540,32 @@ class MIDAS(L.LightningModule):
         mask = []  # List to store mask file paths
 
         for batch_dir in sorted(os.listdir(dir_path)):
-            if batch_dir != "feat":  # Ignore the 'feat' directory
+            if batch_dir != 'feat':  # Ignore the 'feat' directory
                 data_batch = {}
                 mask_batch = {}
                 batch_path = os.path.join(dir_path, batch_dir)
 
                 # Collect file paths for data and masks
                 if os.path.exists(batch_path):
-                    vec_dir = os.path.join(batch_path, "vec")
-                    mask_dir = os.path.join(batch_path, "mask")
+                    vec_dir = os.path.join(batch_path, 'vec')
+                    mask_dir = os.path.join(batch_path, 'mask')
                     for file in os.listdir(vec_dir):
                         data_batch[file] = os.path.join(vec_dir, file)
                     for file in os.listdir(mask_dir):
-                        mask_batch[file.strip(".csv")] = os.path.join(mask_dir, file)
+                        mask_batch[file.strip('.csv')] = os.path.join(mask_dir, file)
 
                 data.append(data_batch)
                 mask.append(mask_batch)
 
         # Load feature dimensions from 'feat_dims.toml'
-        dims_x = toml.load(os.path.join(dir_path, "feat", "feat_dims.toml"))
+        dims_x = toml.load(os.path.join(dir_path, 'feat', 'feat_dims.toml'))
         return data, mask, dims_x
     
     @classmethod
     def configure_data_from_dir(cls, 
                                 dir_path: str, 
                                 transform: dict = None, 
-                                sampler_type: str = "auto", 
+                                sampler_type: str = 'auto', 
                                 **kwargs : dict):
         """
         Configure data from a directory and apply optional transformations.
@@ -1575,10 +1575,10 @@ class MIDAS(L.LightningModule):
                 Path to the directory containing data files.
             transform : dict, optional
                 A dictionary specifying transformations to apply to specific modalities.
-                Example: {"atac": "binarize"}
+                Example: {'atac': 'binarize'}
                 Default is None, which uses the default transformation settings.
             sampler_type : str, optional
-                Type of sampler to use, by default "auto". For "ddp", use distributed sampler.
+                Type of sampler to use, by default 'auto'. For 'ddp', use distributed sampler.
             kwargs : dict
                 Additional parameters passed to configure_data().
 
@@ -1591,8 +1591,8 @@ class MIDAS(L.LightningModule):
                 If `transform` is not a dictionary.
 
         Examples:
-            >>> dir_path = "./data_processed/xxx"
-            >>> transform = {"atac": "binarize"}
+            >>> dir_path = './data_processed/xxx'
+            >>> transform = {'atac': 'binarize'}
             >>> model = MIDAS.configure_data_from_dir(dir_path, transform)
 
         """
@@ -1635,30 +1635,30 @@ class MIDAS(L.LightningModule):
         Examples:
             >>> # Example 1: Basic CSV files as input for each modality (RNA, ADT, ATAC)
             >>> # Data for each modality is provided as a path to CSV files.
-            >>> dims_x = {"mod1":[200], "mod2":[200], "mod3":[100, 200, 300]}
-            >>> data = [{"rna":"rna.csv", "adt":"adt.csv", "atac":"atac.csv"}]
-            >>> mask = [{"rna":"rna_mask.csv", "adt":"adt_mask.csv"}]  # Mask files for RNA and ADT
-            >>> transform = {"atac":"binarize"}
+            >>> dims_x = {'mod1':[200], 'mod2':[200], 'mod3':[100, 200, 300]}
+            >>> data = [{'rna':'rna.csv', 'adt':'adt.csv', 'atac':'atac.csv'}]
+            >>> mask = [{'rna':'rna_mask.csv', 'adt':'adt_mask.csv'}]  # Mask files for RNA and ADT
+            >>> transform = {'atac':'binarize'}
             >>> datasets, dims_s, s_joint, combs = MIDAS.configure_data_from_csv(data, mask, transform)
             >>> model = MIDAS.configure_data(datasets, dims_x, dims_s, s_joint, combs)
             # This example demonstrates the use of CSV files for each modality (RNA, ADT, ATAC) along with their respective masks.
 
             >>> # Example 2: Directory paths as input for each modality (RNA, ADT, ATAC)
             >>> # Instead of CSV files, the data for each modality is provided as directory paths.
-            >>> dims_x = {"mod1":[200], "mod2":[200], "mod3":[100, 200, 300]}
-            >>> data = [{"rna":"./rna/", "adt":"./adt/", "atac":"./atac/"}]  # Directories containing the modality data
-            >>> mask = [{"rna":"rna_mask.csv", "adt":"adt_mask.csv"}]  # Mask files remain as CSV
-            >>> transform = {"atac":"binarize"}
+            >>> dims_x = {'mod1':[200], 'mod2':[200], 'mod3':[100, 200, 300]}
+            >>> data = [{'rna':'./rna/', 'adt':'./adt/', 'atac':'./atac/'}]  # Directories containing the modality data
+            >>> mask = [{'rna':'rna_mask.csv', 'adt':'adt_mask.csv'}]  # Mask files remain as CSV
+            >>> transform = {'atac':'binarize'}
             >>> datasets, dims_s, s_joint, combs = MIDAS.configure_data_from_csv(data, mask, transform)
             >>> model = MIDAS.configure_data(datasets, dims_x, dims_s, s_joint, combs)
             # This example shows how to configure the data when it is located in directories rather than individual CSV files.
 
             >>> # Example 3: Mixed input for handling large datasets to avoid memory overload
             >>> # A mix of CSV and directory input for different modalities, useful for larger datasets that would be memory-intensive.
-            >>> dims_x = {"mod1":[200], "mod2":[200], "mod3":[100, 200, 300]}
-            >>> data = [{"rna":"rna.csv", "adt":"adt.csv", "atac":"./atac/"}]  # Combining CSV files for RNA and ADT with directory for ATAC
-            >>> mask = [{"rna":"rna_mask.csv", "adt":"adt_mask.csv"}]  # Masks are still provided as CSV files
-            >>> transform = {"atac":"binarize"}
+            >>> dims_x = {'mod1':[200], 'mod2':[200], 'mod3':[100, 200, 300]}
+            >>> data = [{'rna':'rna.csv', 'adt':'adt.csv', 'atac':'./atac/'}]  # Combining CSV files for RNA and ADT with directory for ATAC
+            >>> mask = [{'rna':'rna_mask.csv', 'adt':'adt_mask.csv'}]  # Masks are still provided as CSV files
+            >>> transform = {'atac':'binarize'}
             >>> datasets, dims_s, s_joint, combs = MIDAS.configure_data_from_csv(data, mask, transform)
             >>> model = MIDAS.configure_data(datasets, dims_x, dims_s, s_joint, combs)
             # This example handles mixed input types and is designed to prevent large matrices from being fully loaded into memory.
@@ -1684,14 +1684,14 @@ class MIDAS(L.LightningModule):
                 batch_combs.append(modality)
 
             # Add joint batch information
-            batch_s["joint"] = i
-            n_s["joint"] = i
+            batch_s['joint'] = i
+            n_s['joint'] = i
             s_joint.append(batch_s)
             combs.append(batch_combs)
 
             # Determine file types for each modality
             file_types = {
-                modality: "mat" if batch_data[modality].endswith((".csv", ".csv.gz")) else "vec"
+                modality: 'mat' if batch_data[modality].endswith(('.csv', '.csv.gz')) else 'vec'
                 for modality in batch_data.keys()
             }
 
@@ -1720,7 +1720,7 @@ class MIDAS(L.LightningModule):
 
         # Calculate mask density for each batch
         for i, batch_mask in enumerate(mask):
-            batch_summary = {modality.upper(): "-" for modality in dims_x.keys()}
+            batch_summary = {modality.upper(): '-' for modality in dims_x.keys()}
             for m in datalist[i].mod_dict.keys():
                 batch_summary[m.upper()] = 1
             for modality, path in batch_mask.items():
@@ -1730,9 +1730,9 @@ class MIDAS(L.LightningModule):
 
         # Convert mask density summary to DataFrame
         mask_values = pd.DataFrame(mask_values)
-        mask_values.index = [f"BATCH {i}" for i in range(len(mask_values))]
-        mask_values["#Cell"] = [len(dataset) for dataset in datalist]
+        mask_values.index = [f'BATCH {i}' for i in range(len(mask_values))]
+        mask_values['#Cell'] = [len(dataset) for dataset in datalist]
 
         # Print summary
-        logging.info("Input Summary (Mask Density and Number)")
-        logging.info("\n" + mask_values.to_string())
+        logging.info('Input Summary (Mask Density and Number)')
+        logging.info('\n' + mask_values.to_string())

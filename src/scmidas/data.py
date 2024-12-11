@@ -20,7 +20,7 @@ from torch.utils.data import Dataset, Sampler
 from .nn import transform_registry
 from .utils import load_csv
 
-_T_co = TypeVar("_T_co", covariant=True)
+_T_co = TypeVar('_T_co', covariant=True)
 
 
 class BasicModDataset(Dataset):
@@ -108,14 +108,14 @@ class MatDataset(BasicModDataset):
 
     def __init__(self, csv_file: str):
         super().__init__()
-        if csv_file.endswith(".csv"):
+        if csv_file.endswith('.csv'):
             # Load CSV into a NumPy array
             self.data_frame = np.array(load_csv(csv_file))[1:, 1:].astype(np.float32)
-        elif csv_file.endswith(".csv.gz"):
+        elif csv_file.endswith('.csv.gz'):
             # Load compressed CSV using pandas
             self.data_frame = pd.read_csv(csv_file, index_col=0).values.astype(np.float32)
         else:
-            raise ValueError(f"Unsupported file format: {csv_file}")
+            raise ValueError(f'Unsupported file format: {csv_file}')
 
     def __len__(self) -> int:
         """
@@ -141,7 +141,7 @@ class MatDataset(BasicModDataset):
         """
         return self.data_frame[idx]
 
-modDataset_map = {"vec": VecDataset, "mat": MatDataset}
+modDataset_map = {'vec': VecDataset, 'mat': MatDataset}
 
 
 class MultiModalDataset(Dataset):
@@ -154,7 +154,7 @@ class MultiModalDataset(Dataset):
         mod_id_dict : Dict[str, int]
             A dictionary mapping modality names to their unique identifiers.
         file_type : Dict[str, str]
-            A dictionary mapping modality names to their file types (e.g., "vec", "mat").
+            A dictionary mapping modality names to their file types (e.g., 'vec', 'mat').
         mask_path : Optional[Dict[str, str]], optional
             A dictionary mapping modality names to their mask file paths, default is None.
         transform : Optional[Dict[str, str]], optional
@@ -213,32 +213,32 @@ class MultiModalDataset(Dataset):
         Returns:
             Dict[str, Dict[str, Any]]:
                 A dictionary containing the following keys:
-                - "x": Modality data at the given index, with optional transformations applied.
-                - "s": Modality IDs.
-                - "e": Masking information, if available.
+                - 'x': Modality data at the given index, with optional transformations applied.
+                - 's': Modality IDs.
+                - 'e': Masking information, if available.
         """
-        items = {"x": {}, "s": {}, "e": {}}
+        items = {'x': {}, 's': {}, 'e': {}}
 
         # Retrieve data for each modality
         for modality, dataset in self.data.items():
             # Get raw data
-            items["x"][modality] = dataset[idx]
+            items['x'][modality] = dataset[idx]
 
             # Apply transformation if specified
             if modality in self.transform:
                 transform_fn = transform_registry.get(self.transform[modality])
-                items["x"][modality] = transform_fn(items["x"][modality])
+                items['x'][modality] = transform_fn(items['x'][modality])
 
             # Store modality ID
-            items["s"][modality] = np.array([self.mod_id_dict[modality]], dtype=np.int64)
+            items['s'][modality] = np.array([self.mod_id_dict[modality]], dtype=np.int64)
 
         # Add joint ID
-        items["s"]["joint"] = np.array([self.mod_id_dict["joint"]], dtype=np.int64)
+        items['s']['joint'] = np.array([self.mod_id_dict['joint']], dtype=np.int64)
 
         # Add masking information if available
         if self.mask:
             for modality, mask_data in self.mask.items():
-                items["e"][modality] = mask_data
+                items['e'][modality] = mask_data
 
         return items
 
@@ -266,8 +266,8 @@ class MultiBatchSampler(Sampler):
         n_max: int = 10000,
     ):
         super().__init__(data_source)
-        if not hasattr(data_source, "datasets") or not hasattr(data_source, "cumulative_sizes"):
-            raise ValueError("Data source must be a ConcatDataset or equivalent.")
+        if not hasattr(data_source, 'datasets') or not hasattr(data_source, 'cumulative_sizes'):
+            raise ValueError('Data source must be a ConcatDataset or equivalent.')
 
         self.data = data_source
         self.shuffle = shuffle
@@ -364,15 +364,15 @@ class MyDistributedSampler(DistributedSampler):
     ) -> None:
         if num_replicas is None:
             if not dist.is_available():
-                raise RuntimeError("Requires distributed package to be available")
+                raise RuntimeError('Requires distributed package to be available')
             num_replicas = dist.get_world_size()
         if rank is None:
             if not dist.is_available():
-                raise RuntimeError("Requires distributed package to be available")
+                raise RuntimeError('Requires distributed package to be available')
             rank = dist.get_rank()
         if rank >= num_replicas or rank < 0:
             raise ValueError(
-                f"Invalid rank {rank}, rank should be in the interval [0, {num_replicas - 1}]"
+                f'Invalid rank {rank}, rank should be in the interval [0, {num_replicas - 1}]'
             )
 
         self.dataset = dataset
@@ -477,15 +477,15 @@ def download_file(url: str, dest_path: Path):
         # Open the destination file in write-binary mode
         with open(dest_path, 'wb') as file:
             # Use tqdm to display download progress
-            with tqdm(total=total_size, unit='B', unit_scale=True, desc=f"Downloading {dest_path.name}") as pbar:
+            with tqdm(total=total_size, unit='B', unit_scale=True, desc=f'Downloading {dest_path.name}') as pbar:
                 for chunk in response.iter_content(chunk_size=1024):
                     if chunk:
                         file.write(chunk)
                         pbar.update(len(chunk))  # Update progress bar with the downloaded chunk size
-        logging.info(f"Downloaded: {url} to {dest_path}")
+        logging.info(f'Downloaded: {url} to {dest_path}')
 
     except requests.exceptions.RequestException as e:
-        logging.error(f"Error downloading {url}: {e}")
+        logging.error(f'Error downloading {url}: {e}')
         raise
 
 def unzip_file(zip_path: Path, extract_to: Path):
@@ -500,45 +500,45 @@ def unzip_file(zip_path: Path, extract_to: Path):
     try:
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(extract_to)
-        logging.info(f"Unzipped: {zip_path} to {extract_to}")
+        logging.info(f'Unzipped: {zip_path} to {extract_to}')
     except zipfile.BadZipFile as e:
-        logging.error(f"Error unzipping {zip_path}: {e}")
+        logging.error(f'Error unzipping {zip_path}: {e}')
         raise
 
-def download_data(name: str, des: str = "./"):
+def download_data(name: str, des: str = './'):
     """
     Downloads the specified dataset and extracts it.
 
     Parameters:
         name : str
-            Name of the dataset to download (e.g., "teadog_mosaic_4k").
+            Name of the dataset to download (e.g., 'teadog_mosaic_4k').
         des : str
             Destination path to save the dataset (default is the current directory).
     """
     # Set up the destination path
-    des_path = Path(des) / "demo"
+    des_path = Path(des) / 'demo'
     des_path.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
 
     # Define dataset-specific URLs
-    if name == "teadog_mosaic_4k":
+    if name == 'teadog_mosaic_4k':
         try:
             # Download and extract the TEADOG mosaic dataset
             urls = [
-                ("https://drive.usercontent.google.com/download?id=1MQtg5CHV3KDsmbRowiNnggKImYazBpOi&export=download&authuser=0&confirm=t&uuid=840e8dbf-6a9b-407f-89fe-cc5c82debc8a&at=APvzH3omA-S-4W1YkjAlCvyM6EuX:1733823042031", 
+                ('https://drive.usercontent.google.com/download?id=1MQtg5CHV3KDsmbRowiNnggKImYazBpOi&export=download&authuser=0&confirm=t&uuid=840e8dbf-6a9b-407f-89fe-cc5c82debc8a&at=APvzH3omA-S-4W1YkjAlCvyM6EuX:1733823042031', 
                  des_path / 'teadog_mosaic_4k.zip'),
             ]
 
             for url, file_path in urls:
                 download_file(url, file_path)
-                if file_path.suffix == ".zip":
+                if file_path.suffix == '.zip':
                     unzip_file(file_path, des_path)
                     os.remove(file_path)  # Clean up the zip file after extraction
 
-            logging.info("TEADOG mosaic dataset downloaded and extracted successfully.")
+            logging.info('TEADOG mosaic dataset downloaded and extracted successfully.')
 
         except Exception as e:
-            logging.error(f"An error occurred while downloading the dataset: {e}")
+            logging.error(f'An error occurred while downloading the dataset: {e}')
             raise
     else:
-        logging.error(f"Dataset '{name}' is not recognized.")
-        raise ValueError(f"Dataset '{name}' not supported.")
+        logging.error(f'Dataset "{name}" is not recognized.')
+        raise ValueError(f'Dataset "{name}" not supported.')

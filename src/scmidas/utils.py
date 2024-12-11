@@ -27,7 +27,7 @@ def load_csv(filename: str) -> list:
         list
             A list of rows, where each row is a list of strings.
     """
-    with open(filename, "r") as file:
+    with open(filename, 'r') as file:
         reader = csv.reader(file)
         data = list(reader)
     return data
@@ -231,7 +231,7 @@ def save_list_to_csv(data: List[List[Any]], filename: str, delimiter: str = ',')
         delimiter : str, optional
             Delimiter to separate values in the CSV file, by default ','.
     """
-    with open(filename, "w") as file:
+    with open(filename, 'w') as file:
         writer = csv.writer(file, delimiter=delimiter)
         writer.writerows(data)
 
@@ -265,10 +265,10 @@ def get_name_fmt(file_num: int) -> str:
     Returns:
     
         str
-            Format string for filenames, e.g., "%03d" for three-digit naming.
+            Format string for filenames, e.g., '%03d' for three-digit naming.
     """
     digits = math.floor(math.log10(file_num)) + 1
-    return f"%0{digits}d"
+    return f'%0{digits}d'
 
 
 def convert_tensors_to_cuda(x: Dict[str, Any], device: torch.device) -> Dict[str, Any]:
@@ -332,7 +332,7 @@ def get_filenames(directory: str, extension: str) -> List[str]:
         list of str
             Sorted list of filenames with the specified extension.
     """
-    filenames = glob(os.path.join(directory, f"*.{extension}"))
+    filenames = glob(os.path.join(directory, f'*.{extension}'))
     filenames = [os.path.basename(filename) for filename in filenames]
     filenames.sort()
     return filenames
@@ -349,7 +349,7 @@ def load_predicted(
     batch_correct: bool = False,
     translate: bool = False,
     input: bool = False,
-    group_by: str = "modality"
+    group_by: str = 'modality'
 ) -> Union[Dict[int, Dict[str, Any]], Dict[str, Dict[str, np.ndarray]]]:
     """
     Load predicted variables from a specified directory.
@@ -377,14 +377,14 @@ def load_predicted(
         input : bool, optional
             Whether to include input data, by default False.
         group_by : str, optional
-            Grouping method for the data, either "modality" or "batch", by default "modality".
+            Grouping method for the data, either 'modality' or 'batch', by default 'modality'.
 
     Returns:
     
         dict
             Loaded predicted data grouped by the specified method.
     """
-    logging.info("Loading predicted variables ...")
+    logging.info('Loading predicted variables ...')
     dirs = get_pred_dirs(pred_dir, 
                          s_joint, 
                          combs, 
@@ -399,37 +399,37 @@ def load_predicted(
 
     # Load data from directories
     for batch_id, batch_dirs in dirs.items():
-        data[batch_id] = {"s": {}}
+        data[batch_id] = {'s': {}}
         for variable, variable_dirs in batch_dirs.items():
             data[batch_id][variable] = {}
             for mod, dir_path in variable_dirs.items():
-                logging.info(f"Loading batch {batch_id}: {variable}, {mod}")
+                logging.info(f'Loading batch {batch_id}: {variable}, {mod}')
                 data[batch_id][variable][mod] = []
-                if variable == "z":
-                    data[batch_id]["s"][mod] = []
-                filenames = get_filenames(dir_path, "csv")
+                if variable == 'z':
+                    data[batch_id]['s'][mod] = []
+                filenames = get_filenames(dir_path, 'csv')
                 for filename in tqdm(filenames):
                     v = load_csv(os.path.join(dir_path, filename))
                     data[batch_id][variable][mod] += v
-                    if variable == "z":
-                        data[batch_id]["s"][mod] += [batch_id] * len(v)
+                    if variable == 'z':
+                        data[batch_id]['s'][mod] += [batch_id] * len(v)
 
-    logging.info("Converting to numpy ...")
+    logging.info('Converting to numpy ...')
     for batch_id, batch_data in data.items():
         for variable, variable_data in batch_data.items():
             for mod, values in variable_data.items():
-                logging.info(f"Converting batch {batch_id}: {variable}, {mod}")
-                if variable in ["z", "x_trans", "x_impt", "s", "x", "x_bc"]:
+                logging.info(f'Converting batch {batch_id}: {variable}, {mod}')
+                if variable in ['z', 'x_trans', 'x_impt', 's', 'x', 'x_bc']:
                     data[batch_id][variable][mod] = values
 
     # Group data by modality if required
-    if group_by == "batch":
+    if group_by == 'batch':
         for batch_id, batch_data in data.items():
             for variable, variable_data in batch_data.items():
                 for mod, values in variable_data.items():
                     data[batch_id][variable][mod] = np.array(data[batch_id][variable][mod]).astype(np.float32)
         return data
-    elif group_by == "modality":
+    elif group_by == 'modality':
         data_m = {}
         for batch_id, batch_data in data.items():
             for variable, variable_data in batch_data.items():
@@ -493,34 +493,34 @@ def get_pred_dirs(
     """
     dirs = {}
     for batch_id in range(len(s_joint)):
-        batch_dir = os.path.join(pred_dir, f"batch_{batch_id}")
+        batch_dir = os.path.join(pred_dir, f'batch_{batch_id}')
         dirs[batch_id] = {}
 
         if joint_latent or mod_latent:
-            dirs[batch_id]["z"] = {}
+            dirs[batch_id]['z'] = {}
             if joint_latent:
-                dirs[batch_id]["z"]["joint"] = os.path.join(batch_dir, "z", "joint")
+                dirs[batch_id]['z']['joint'] = os.path.join(batch_dir, 'z', 'joint')
             if mod_latent:
                 for mod in combs[batch_id]:
-                    dirs[batch_id]["z"][mod] = os.path.join(batch_dir, "z", mod)
+                    dirs[batch_id]['z'][mod] = os.path.join(batch_dir, 'z', mod)
 
         if impute:
-            dirs[batch_id]["x_impt"] = {mod: os.path.join(batch_dir, "x_impt", mod) for mod in mods}
+            dirs[batch_id]['x_impt'] = {mod: os.path.join(batch_dir, 'x_impt', mod) for mod in mods}
 
         if batch_correct:
-            dirs[batch_id]["x_bc"] = {mod: os.path.join(batch_dir, "x_bc", mod) for mod in mods}
+            dirs[batch_id]['x_bc'] = {mod: os.path.join(batch_dir, 'x_bc', mod) for mod in mods}
 
         if translate:
-            dirs[batch_id]["x_trans"] = {}
+            dirs[batch_id]['x_trans'] = {}
             all_combinations = generate_all_combinations(mods)
             for input_mods, output_mods in all_combinations:
                 input_mods_sorted = sorted(input_mods)
                 for mod in output_mods:
-                    key = "_".join(input_mods_sorted) + "_to_" + mod
-                    dirs[batch_id]["x_trans"][key] = os.path.join(batch_dir, "x_trans", key)
+                    key = '_'.join(input_mods_sorted) + '_to_' + mod
+                    dirs[batch_id]['x_trans'][key] = os.path.join(batch_dir, 'x_trans', key)
 
         if input:
-            dirs[batch_id]["x"] = {mod: os.path.join(batch_dir, "x", mod) for mod in combs[batch_id]}
+            dirs[batch_id]['x'] = {mod: os.path.join(batch_dir, 'x', mod) for mod in combs[batch_id]}
 
     return dirs
 
@@ -584,7 +584,7 @@ def reverse_trsf(name: str, data: np.ndarray, **kwargs) -> np.ndarray:
     Parameters:
     
         name : str
-            Name of the transformation to reverse (e.g., "log1p").
+            Name of the transformation to reverse (e.g., 'log1p').
         data : np.ndarray
             Data to transform.
         kwargs : dict
@@ -596,10 +596,10 @@ def reverse_trsf(name: str, data: np.ndarray, **kwargs) -> np.ndarray:
             Transformed data.
     """
     # Extract parameters from kwargs
-    params = {k.split("_")[-1]: v for k, v in kwargs.items()}
+    params = {k.split('_')[-1]: v for k, v in kwargs.items()}
 
     # Perform the reverse transformation based on the name
-    if name == "log1p":
+    if name == 'log1p':
         return data.exp()
     else:
         return data

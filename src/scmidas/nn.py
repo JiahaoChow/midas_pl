@@ -18,18 +18,18 @@ class DistributionRegistry:
 
         # Register default functions
         self.register(
-            "POISSON",
-            nn.PoissonNLLLoss(full=True, reduction="none"),
+            'POISSON',
+            nn.PoissonNLLLoss(full=True, reduction='none'),
             self.poisson_sampling,
             self.null,
         )
         self.register(
-            "BERNOULLI",
-            nn.BCELoss(reduction="none"),
+            'BERNOULLI',
+            nn.BCELoss(reduction='none'),
             self.bernoulli_sampling,
             nn.Sigmoid(),
         )
-        self.register("CE", nn.CrossEntropyLoss(reduction="none"), self.null, self.null)
+        self.register('CE', nn.CrossEntropyLoss(reduction='none'), self.null, self.null)
 
     def register(
         self, name: str, loss_fn: nn.Module, sampling_fn: Callable, activate_fn: Callable
@@ -52,7 +52,7 @@ class DistributionRegistry:
                 If the name is already registered in any of the maps.
         """
         if name in self.loss_map:
-            raise ValueError(f"Loss function '{name}' is already registered.")
+            raise ValueError(f'Loss function "{name}" is already registered.')
         self.loss_map[name] = loss_fn
         self.sampling_map[name] = sampling_fn
         self.activate_map[name] = activate_fn
@@ -74,7 +74,7 @@ class DistributionRegistry:
                 If the activation function is not registered.
         """
         if name not in self.activate_map:
-            raise KeyError(f"Activation function '{name}' is not registered.")
+            raise KeyError(f'Activation function "{name}" is not registered.')
         return self.activate_map[name]
 
     def get_sampling(self, name: str) -> Callable:
@@ -94,7 +94,7 @@ class DistributionRegistry:
                 If the sampling function is not registered.
         """
         if name not in self.sampling_map:
-            raise KeyError(f"Sampling function '{name}' is not registered.")
+            raise KeyError(f'Sampling function "{name}" is not registered.')
         return self.sampling_map[name]
 
     def get_loss(self, name: str) -> nn.Module:
@@ -114,7 +114,7 @@ class DistributionRegistry:
                 If the loss function is not registered.
         """
         if name not in self.loss_map:
-            raise KeyError(f"Loss function '{name}' is not registered.")
+            raise KeyError(f'Loss function "{name}" is not registered.')
         return self.loss_map[name]
 
     def list_registered(self) -> list:
@@ -188,8 +188,8 @@ class TransformRegistry:
         self.inverse_transform_map = {}
 
         # Register default transformations with their inverses
-        self.register("binarize", self.binarize, self.null)
-        self.register("log1p", self.log1p, self.exp)
+        self.register('binarize', self.binarize, self.null)
+        self.register('log1p', self.log1p, self.exp)
 
     def register(self, name: str, func: Callable, inverse_func: Callable):
         """
@@ -208,9 +208,9 @@ class TransformRegistry:
                 If the transformation or its inverse is already registered.
         """
         if name in self.transform_map:
-            raise ValueError(f"Transformation '{name}' is already registered.")
+            raise ValueError(f'Transformation "{name}" is already registered.')
         if name in self.inverse_transform_map:
-            raise ValueError(f"Inverse transformation for '{name}' is already registered.")
+            raise ValueError(f'Inverse transformation for "{name}" is already registered.')
 
         self.transform_map[name] = func
         self.inverse_transform_map[name] = inverse_func
@@ -232,7 +232,7 @@ class TransformRegistry:
                 If the specified transformation function is not registered.
         """
         if name not in self.transform_map:
-            raise KeyError(f"Transformation '{name}' is not registered.")
+            raise KeyError(f'Transformation "{name}" is not registered.')
         return self.transform_map[name]
 
     def get_inverse(self, name: str) -> Callable:
@@ -252,7 +252,7 @@ class TransformRegistry:
                 If the specified inverse transformation function is not registered.
         """
         if name not in self.inverse_transform_map:
-            raise KeyError(f"Inverse transformation for '{name}' is not registered.")
+            raise KeyError(f'Inverse transformation for "{name}" is not registered.')
         return self.inverse_transform_map[name]
 
     def list_registered(self) -> List[str]:
@@ -289,7 +289,7 @@ class TransformRegistry:
         elif isinstance(data, torch.Tensor):
             return (data > threshold).float()
         else:
-            raise TypeError("Data must be a numpy array or torch tensor.")
+            raise TypeError('Data must be a numpy array or torch tensor.')
 
     @staticmethod
     def null(data: torch.Tensor) -> torch.Tensor:
@@ -328,7 +328,7 @@ class TransformRegistry:
         elif isinstance(data, torch.Tensor):
             return data.log1p()
         else:
-            raise TypeError("Data must be a numpy array or torch tensor.")
+            raise TypeError('Data must be a numpy array or torch tensor.')
 
     @staticmethod
     def exp(data: Union[np.ndarray, torch.Tensor]) -> Union[np.ndarray, torch.Tensor]:
@@ -352,7 +352,7 @@ class TransformRegistry:
         elif isinstance(data, torch.Tensor):
             return torch.expm1(data)
         else:
-            raise TypeError("Data must be a numpy array or torch tensor.")
+            raise TypeError('Data must be a numpy array or torch tensor.')
 
 
 # Initialize the registry
@@ -369,13 +369,13 @@ class ActivationRegistry:
         self.func_map: Dict[str, Callable] = {}
 
         # Register default activation functions
-        self.register("tanh", nn.Tanh)
-        self.register("relu", nn.ReLU)
-        self.register("silu", nn.SiLU)
-        self.register("mish", nn.Mish)
-        self.register("sigmoid", nn.Sigmoid)
-        self.register("softmax", lambda dim=1: nn.Softmax(dim=dim))
-        self.register("log_softmax", lambda dim=1: nn.LogSoftmax(dim=dim))
+        self.register('tanh', nn.Tanh)
+        self.register('relu', nn.ReLU)
+        self.register('silu', nn.SiLU)
+        self.register('mish', nn.Mish)
+        self.register('sigmoid', nn.Sigmoid)
+        self.register('softmax', lambda dim=1: nn.Softmax(dim=dim))
+        self.register('log_softmax', lambda dim=1: nn.LogSoftmax(dim=dim))
 
     def register(self, name: str, func: Callable):
         """
@@ -388,7 +388,7 @@ class ActivationRegistry:
                 The activation function instance or a factory function.
         """
         if name in self.func_map:
-            raise ValueError(f"Activation function '{name}' is already registered.")
+            raise ValueError(f'Activation function "{name}" is already registered.')
         self.func_map[name] = func
 
     def get(self, name: str, **kwargs) -> Callable:
@@ -412,7 +412,7 @@ class ActivationRegistry:
                 If the activation function does not support dynamic parameters.
         """
         if name not in self.func_map:
-            raise KeyError(f"Activation function '{name}' is not registered.")
+            raise KeyError(f'Activation function "{name}" is not registered.')
 
         # If the function is parameterized (e.g., softmax), allow dynamic configuration
         func = self.func_map[name]
@@ -462,7 +462,7 @@ class MLP(nn.Module):
     def __init__(
         self,
         features: list,
-        hid_trans: str = "mish",
+        hid_trans: str = 'mish',
         out_trans: Union[str, bool] = False,
         norm: Union[str, bool] = False,
         hid_norm: Union[str, bool] = False,
@@ -470,7 +470,7 @@ class MLP(nn.Module):
         hid_drop: Union[float, bool] = False,
     ):
         super(MLP, self).__init__()
-        assert len(features) > 1, "MLP must have at least 2 layers (input and output)!"
+        assert len(features) > 1, 'MLP must have at least 2 layers (input and output)!'
 
         # Apply global normalization and dropout if specified
         if norm:
@@ -538,9 +538,9 @@ class Layer1D(nn.Module):
         layers = []
 
         # Add normalization layer
-        if norm == "bn":
+        if norm == 'bn':
             layers.append(nn.BatchNorm1d(dim))
-        elif norm == "ln":
+        elif norm == 'ln':
             layers.append(nn.LayerNorm(dim))
 
         # Add activation function
