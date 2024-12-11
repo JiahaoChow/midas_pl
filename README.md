@@ -1,13 +1,11 @@
 # MIDAS: a deep generative model for mosaic integration and knowledge transfer of single-cell multimodal data.
 
-
-
 <div align=center>
 <img src="docs/source/_static/img/midas_logo_vertical.png" width="400px">
 </div>
 
 
-MIDAS turns mosaic data into imputed and batch-corrected data to support single-cell multimodal analysis.
+<p align="center"> MIDAS turns mosaic data into imputed and batch-corrected data to support single-cell multimodal analysis. </p>
 
 Read our documentation at https://scmidas.readthedocs.io/en/latest/. We provide **tutorials** in the documentation.
 
@@ -16,12 +14,21 @@ Read our documentation at https://scmidas.readthedocs.io/en/latest/. We provide 
 ```bash
 conda create -n scmidas python=3.12.7
 conda activate scmidas
+conda install scmidas
+```
+
+or:
+
+```bash
 pip install scmidas
 ```
 
 ## Reproducibility
 
 Refer to https://github.com/labomics/midas/tree/reproducibility.
+
+> [!NOTE] \
+> Available
 
 ## Citation
 
