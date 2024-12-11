@@ -17,6 +17,7 @@ Begin by importing the necessary modules:
 
 Step 2: Configure the Model
 ---------------------------
+You can set up the MIDAS model using one of the following methods, depending on the format and organization of your input data.
 
 Option 1: Configure from CSV Files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -69,8 +70,6 @@ If each modality's data is stored in separate directories (with each sample save
 
 .. note::
     Option 1 and Option 2 can be combined for greater flexibility in handling your data.
-
-You can set up the MIDAS model using one of the following methods, depending on the format and organization of your input data.
 
 Option 3: Configure from a Directory
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
