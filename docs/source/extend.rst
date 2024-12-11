@@ -72,6 +72,16 @@ Data Encoder
 
 The encoder transforms data through modality-specific and shared layers to obtain latent representations. You can modify the structure in the `scmidas/model_config.toml` as follows:
 
+.. tip::
+
+   To customize the configuration, you have two options:
+
+   1. Modify the Default Configuration: Directly update the default configuration to suit your requirements.
+   2. Create and Customize a New Configuration:
+   Duplicate the default configuration as a new item.
+   Make your modifications to the new item.
+   Specify the new configuration item when calling the model's configure functions (e.g., ``MIDAS.configure_data_from_dir(task, transform, config_name='new_item')``).
+
 1. **Transformation Before Encoding**: Set the transformation function for the data before encoding.
 
    Example:
@@ -110,7 +120,7 @@ The decoder reconstructs the original data by decoding latents through shared an
       
       dims_shared_dec = [128, 1024]
    
-2. **Dimensionality Expansion Layer**: Define the dimensionality expansion layers after the shared layers.
+2. **Dimensionality Expansion Layer**: If the data is split into chunks, define the dimensionality expansion layers after the shared layers.
 
    Example:
 
