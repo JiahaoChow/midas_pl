@@ -68,7 +68,7 @@ Distribution Functions
 The ``loss`` defines the reconstruction loss function, ``sampling`` defines how batch-corrected counts are calculated, and ``activation`` sets the output layer activation for the decoder.
 
 
-Step 1: Extending the Framework
+Step 1: Extend the Framework
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To begin with, you should load the model configurations as follows:
@@ -176,7 +176,7 @@ To add new functionalities, register transformation and distribution functions a
 
 .. Transformation:
 
-Registering New Transformation Functions
+Register New Transformation Functions
 ----------------------------------------
 
 .. code-block:: python
