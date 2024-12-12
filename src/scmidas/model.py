@@ -124,11 +124,10 @@ class Encoder(nn.Module):
         """
         data = data.copy()
         mask = mask.copy()
-
         # Apply transformations before encoding
         for modality in data.keys():
-            if modality in self.trsf_before_enc:
-                transformation = self.trsf_before_enc[modality]
+            if f'trsf_before_enc_{modality}' in self.trsf_before_enc:
+                transformation = self.trsf_before_enc[f'trsf_before_enc_{modality}']
                 data[modality] = transform_registry.get(transformation)(data[modality])
 
         # Apply masks to data
@@ -788,6 +787,7 @@ class MIDAS(L.LightningModule):
     @classmethod
     def configure_data(
         cls, 
+        configs: dict,
         datalist: List[Dataset], 
         dims_x: Dict[str, list], 
         dims_s: Dict[str, int] , 
@@ -797,12 +797,13 @@ class MIDAS(L.LightningModule):
         n_save:int = 500, 
         save_model_path: str = './saved_models/', 
         sampler_type:str = 'auto', 
-        config_name: str = 'default'
     ):
         """
         Configure the data and model parameters for training.
         
         Parameters:
+            configs : dict,
+                Configurations of the model.
             datalist : List[Dataset]
                 List of datasets to be used for training.
             dims_x : Dict[str, list]
@@ -821,18 +822,11 @@ class MIDAS(L.LightningModule):
                 Directory path for saving model checkpoints, by default './saved_models/'.
             sampler_type : str, optional
                 Type of sampler to use, by default 'auto'. For 'ddp', use distributed sampler.
-            config_name : str, optional
-                Name of the configuration to load from the configuration file, by default 'default'.
 
         Returns:
             cls
                 Returns the configured class instance.
         """
-        # Load model configuration from a TOML file
-        config_path = os.path.join(os.path.dirname(__file__), 'model_config.toml')
-        configs = toml.load(config_path).get(config_name, {})
-        logging.info(f'The model is initialized with the configurations from "{config_path}" [{config_name}].')
-        logging.info('Modify this file to change the configurations.')
 
         # Set class-level attributes
         cls.configs = configs
@@ -1562,7 +1556,8 @@ class MIDAS(L.LightningModule):
         return data, mask, dims_x
     
     @classmethod
-    def configure_data_from_dir(cls, 
+    def configure_data_from_dir(cls,
+                                configs: dict, 
                                 dir_path: str, 
                                 transform: dict = None, 
                                 sampler_type: str = 'auto', 
@@ -1571,6 +1566,8 @@ class MIDAS(L.LightningModule):
         Configure data from a directory and apply optional transformations.
 
         Parameters:
+            configs : dict,
+                Configurations of the model.
             dir_path : str
                 Path to the directory containing data files.
             transform : dict, optional
@@ -1591,9 +1588,12 @@ class MIDAS(L.LightningModule):
                 If `transform` is not a dictionary.
 
         Examples:
+            >>> from scmidas.model import MIDAS
+            >>> from scmidas.config import load_config
+            >>> configs = load_config()
             >>> dir_path = './data_processed/xxx'
             >>> transform = {'atac': 'binarize'}
-            >>> model = MIDAS.configure_data_from_dir(dir_path, transform)
+            >>> model = MIDAS.configure_data_from_dir(configs, dir_path, transform)
 
         """
         # Extract data, mask, and feature dimensions from the directory
@@ -1606,7 +1606,7 @@ class MIDAS(L.LightningModule):
         cls.print_info(mask, datalist, dims_x)
 
         # Finalize and return class instance
-        return cls.configure_data(datalist, dims_x, dims_s, s_joint, combs, sampler_type=sampler_type, **kwargs)
+        return cls.configure_data(configs, datalist, dims_x, dims_s, s_joint, combs, sampler_type=sampler_type, **kwargs)
 
     @staticmethod
     def configure_data_from_csv(data: dict, mask: dict, transform: dict=None):
@@ -1635,32 +1635,41 @@ class MIDAS(L.LightningModule):
         Examples:
             >>> # Example 1: Basic CSV files as input for each modality (RNA, ADT, ATAC)
             >>> # Data for each modality is provided as a path to CSV files.
+            >>> from scmidas.model import MIDAS
+            >>> from scmidas.config import load_config
+            >>> configs = load_config()
             >>> dims_x = {'mod1':[200], 'mod2':[200], 'mod3':[100, 200, 300]}
             >>> data = [{'rna':'rna.csv', 'adt':'adt.csv', 'atac':'atac.csv'}]
             >>> mask = [{'rna':'rna_mask.csv', 'adt':'adt_mask.csv'}]  # Mask files for RNA and ADT
             >>> transform = {'atac':'binarize'}
             >>> datasets, dims_s, s_joint, combs = MIDAS.configure_data_from_csv(data, mask, transform)
-            >>> model = MIDAS.configure_data(datasets, dims_x, dims_s, s_joint, combs)
+            >>> model = MIDAS.configure_data(configs, datasets, dims_x, dims_s, s_joint, combs)
             # This example demonstrates the use of CSV files for each modality (RNA, ADT, ATAC) along with their respective masks.
 
             >>> # Example 2: Directory paths as input for each modality (RNA, ADT, ATAC)
             >>> # Instead of CSV files, the data for each modality is provided as directory paths.
+            >>> from scmidas.model import MIDAS
+            >>> from scmidas.config import load_config
+            >>> configs = load_config()
             >>> dims_x = {'mod1':[200], 'mod2':[200], 'mod3':[100, 200, 300]}
             >>> data = [{'rna':'./rna/', 'adt':'./adt/', 'atac':'./atac/'}]  # Directories containing the modality data
             >>> mask = [{'rna':'rna_mask.csv', 'adt':'adt_mask.csv'}]  # Mask files remain as CSV
             >>> transform = {'atac':'binarize'}
             >>> datasets, dims_s, s_joint, combs = MIDAS.configure_data_from_csv(data, mask, transform)
-            >>> model = MIDAS.configure_data(datasets, dims_x, dims_s, s_joint, combs)
+            >>> model = MIDAS.configure_data(configs, datasets, dims_x, dims_s, s_joint, combs)
             # This example shows how to configure the data when it is located in directories rather than individual CSV files.
 
             >>> # Example 3: Mixed input for handling large datasets to avoid memory overload
             >>> # A mix of CSV and directory input for different modalities, useful for larger datasets that would be memory-intensive.
+            >>> from scmidas.model import MIDAS
+            >>> from scmidas.config import load_config
+            >>> configs = load_config()
             >>> dims_x = {'mod1':[200], 'mod2':[200], 'mod3':[100, 200, 300]}
             >>> data = [{'rna':'rna.csv', 'adt':'adt.csv', 'atac':'./atac/'}]  # Combining CSV files for RNA and ADT with directory for ATAC
             >>> mask = [{'rna':'rna_mask.csv', 'adt':'adt_mask.csv'}]  # Masks are still provided as CSV files
             >>> transform = {'atac':'binarize'}
             >>> datasets, dims_s, s_joint, combs = MIDAS.configure_data_from_csv(data, mask, transform)
-            >>> model = MIDAS.configure_data(datasets, dims_x, dims_s, s_joint, combs)
+            >>> model = MIDAS.configure_data(configs, datasets, dims_x, dims_s, s_joint, combs)
             # This example handles mixed input types and is designed to prevent large matrices from being fully loaded into memory.
         """
         s_joint = []  # Modality indices for each batch

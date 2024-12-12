@@ -28,7 +28,7 @@ or:
 pip install scmidas
 ```
 
-## 🔥News
+## 🔥New
 
 > MIDAS now supports:
 >

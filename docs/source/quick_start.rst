@@ -12,6 +12,7 @@ Begin by importing the necessary modules:
 .. code-block:: python
    
     from scmidas.model import MIDAS
+    from scmidas.config import load_config
     import lightning as L
     from lightning.pytorch import loggers as pl_loggers
 
@@ -33,13 +34,12 @@ If your data is stored as CSV files, you can configure the model as follows:
     transform = {'mod1': 'binarize'}
     # Masks for specific modalities
     mask = {'mod1': 'mask1.csv', 'mod3': 'mask3.csv'}
-
     # Set up the dimensions for each modalities
     dims_x = {'mod1':[200], 'mod2':[200], 'mod3':[100, 200, 300]}
-
+    configs = load_config()
     # Configure the model with data, masks, and transformations
     datasets, dims_s, s_joint, combs = MIDAS.configure_data_from_csv(data, mask, transform)
-    model = MIDAS.configure_data(datasets, dims_x, dims_s, s_joint, combs)
+    model = MIDAS.configure_data(configs, datasets, dims_x, dims_s, s_joint, combs)
 
 .. note::
     1. This method is efficient as it avoids re-fetching data, making it well-suited for datasets that can fit into memory. For larger datasets that cannot be fully loaded, consider Option 2, which allows loading one sample at a time instead of the entire dataset.
@@ -60,13 +60,12 @@ If each modality's data is stored in separate directories (with each sample save
     transform = {'mod1': 'binarize'}
     # Masks for specific modalities
     mask = {'mod1': 'mask1.csv', 'mod3': 'mask3.csv'}
-
     # Set up the dimensions for each modalities
     dims_x = {'mod1':[200], 'mod2':[200], 'mod3':[100, 200, 300]}
-
+    configs = load_config()
     # Configure the model with data, masks, and transformations
     datasets, dims_s, s_joint, combs = MIDAS.configure_data_from_csv(data, mask, transform)
-    model = MIDAS.configure_data(datasets, dims_x, dims_s, s_joint, combs)
+    model = MIDAS.configure_data(configs, datasets, dims_x, dims_s, s_joint, combs)
 
 .. note::
     Option 1 and Option 2 can be combined for greater flexibility in handling your data.
@@ -80,7 +79,8 @@ If your data is organized in a directory with standard MIDAS input formats:
 
     task = 'path/to/directory_containing_MIDAS_inputs'
     transform = {'mod': 'binarize'}  # Example of a transformation
-    model = MIDAS.configure_data_from_dir(task, transform, config_name='default')
+    configs = load_config()
+    model = MIDAS.configure_data_from_dir(configs, task, transform)
 
 
 Step 3: Configure the Training Process

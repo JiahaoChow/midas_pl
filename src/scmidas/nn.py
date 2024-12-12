@@ -3,6 +3,9 @@ import torch
 import torch.nn as nn
 from typing import Callable, Union, List, Dict
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
 
 class DistributionRegistry:
     """
@@ -52,7 +55,7 @@ class DistributionRegistry:
                 If the name is already registered in any of the maps.
         """
         if name in self.loss_map:
-            raise ValueError(f'Loss function "{name}" is already registered.')
+            logging.info(f'Loss function "{name}" is already registered. Override it.')
         self.loss_map[name] = loss_fn
         self.sampling_map[name] = sampling_fn
         self.activate_map[name] = activate_fn
@@ -191,16 +194,16 @@ class TransformRegistry:
         self.register('binarize', self.binarize, self.null)
         self.register('log1p', self.log1p, self.exp)
 
-    def register(self, name: str, func: Callable, inverse_func: Callable):
+    def register(self, name: str, fn: Callable, inverse_fn: Callable):
         """
         Register a new transformation function along with its inverse.
 
         Parameters:
             name : str
                 The name of the transformation function (key for retrieval).
-            func : callable
+            fn : callable
                 The transformation function.
-            inverse_func : callable
+            inverse_fn : callable
                 The inverse of the transformation function.
 
         Raises:
@@ -208,12 +211,10 @@ class TransformRegistry:
                 If the transformation or its inverse is already registered.
         """
         if name in self.transform_map:
-            raise ValueError(f'Transformation "{name}" is already registered.')
-        if name in self.inverse_transform_map:
-            raise ValueError(f'Inverse transformation for "{name}" is already registered.')
+            logging.info(f'Transformation "{name}" is already registered. Override it.')
 
-        self.transform_map[name] = func
-        self.inverse_transform_map[name] = inverse_func
+        self.transform_map[name] = fn
+        self.inverse_transform_map[name] = inverse_fn
 
     def get(self, name: str) -> Callable:
         """
@@ -388,7 +389,8 @@ class ActivationRegistry:
                 The activation function instance or a factory function.
         """
         if name in self.func_map:
-            raise ValueError(f'Activation function "{name}" is already registered.')
+            logging.info(f'Activation function "{name}" is already registered. Override it.')
+        
         self.func_map[name] = func
 
     def get(self, name: str, **kwargs) -> Callable:

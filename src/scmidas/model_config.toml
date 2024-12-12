@@ -1,5 +1,8 @@
 # Basic configuration
 [default]
+
+# available_mods = ["rna", "adt", "atac"]  # Supported modalities
+
 dim_c = 32  # Latent dimension for biological information
 dim_u = 2   # Latent dimension for technical information (always be small to avoid capturing biological information)
 
@@ -23,8 +26,6 @@ out_trans = "mish"    # Activation function for the output
 # Modality configuration
 dims_shared_enc = [1024, 128]  # Shared encoder structure across all modalities
 dims_shared_dec = [128, 1024]  # Shared decoder structure across all modalities
-
-available_mods = ["rna", "adt", "atac"]  # Supported modalities
 
 # RNA modality configuration
 trsf_before_enc_rna = "log1p"      # Apply log1p transformation before encoding. Exponential transformation will be applied after decoding.

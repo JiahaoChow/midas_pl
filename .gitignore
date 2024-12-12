@@ -6,3 +6,7 @@ requirements.txt
 dist
 tests
 src/scmidas.egg-info
+docs/build
+saved_models
+predict
+src/scmidas/__pycache__
