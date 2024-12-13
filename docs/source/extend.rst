@@ -174,8 +174,6 @@ Step 2: Register New Functions
 
 To add new functionalities, register transformation and distribution functions as follows:
 
-.. Transformation:
-
 Register New Transformation Functions
 ----------------------------------------
 
@@ -184,8 +182,6 @@ Register New Transformation Functions
    from scmidas.nn import transform_registry
    transform_registry.register(name, fn, inverse_fn)
 
-
-.. Distribution:
 
 Register New Distribution Functions
 --------------------------------------
