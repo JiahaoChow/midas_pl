@@ -1602,9 +1602,6 @@ class MIDAS(L.LightningModule):
         # Configure datasets and associated parameters
         datalist, dims_s, s_joint, combs = cls.configure_data_from_csv(data, mask, transform)
 
-        # Print dataset and mask b
-        cls.print_info(mask, datalist, dims_x)
-
         # Finalize and return class instance
         return cls.configure_data(configs, datalist, dims_x, dims_s, s_joint, combs, sampler_type=sampler_type, **kwargs)
 
@@ -1631,46 +1628,6 @@ class MIDAS(L.LightningModule):
                 Modality indices for each batch.
             combs : list
                 List of modality combinations for each batch.
-
-        Examples:
-            >>> # Example 1: Basic CSV files as input for each modality (RNA, ADT, ATAC)
-            >>> # Data for each modality is provided as a path to CSV files.
-            >>> from scmidas.model import MIDAS
-            >>> from scmidas.config import load_config
-            >>> configs = load_config()
-            >>> dims_x = {'mod1':[200], 'mod2':[200], 'mod3':[100, 200, 300]}
-            >>> data = [{'rna':'rna.csv', 'adt':'adt.csv', 'atac':'atac.csv'}]
-            >>> mask = [{'rna':'rna_mask.csv', 'adt':'adt_mask.csv'}]  # Mask files for RNA and ADT
-            >>> transform = {'atac':'binarize'}
-            >>> datasets, dims_s, s_joint, combs = MIDAS.configure_data_from_csv(data, mask, transform)
-            >>> model = MIDAS.configure_data(configs, datasets, dims_x, dims_s, s_joint, combs)
-            # This example demonstrates the use of CSV files for each modality (RNA, ADT, ATAC) along with their respective masks.
-
-            >>> # Example 2: Directory paths as input for each modality (RNA, ADT, ATAC)
-            >>> # Instead of CSV files, the data for each modality is provided as directory paths.
-            >>> from scmidas.model import MIDAS
-            >>> from scmidas.config import load_config
-            >>> configs = load_config()
-            >>> dims_x = {'mod1':[200], 'mod2':[200], 'mod3':[100, 200, 300]}
-            >>> data = [{'rna':'./rna/', 'adt':'./adt/', 'atac':'./atac/'}]  # Directories containing the modality data
-            >>> mask = [{'rna':'rna_mask.csv', 'adt':'adt_mask.csv'}]  # Mask files remain as CSV
-            >>> transform = {'atac':'binarize'}
-            >>> datasets, dims_s, s_joint, combs = MIDAS.configure_data_from_csv(data, mask, transform)
-            >>> model = MIDAS.configure_data(configs, datasets, dims_x, dims_s, s_joint, combs)
-            # This example shows how to configure the data when it is located in directories rather than individual CSV files.
-
-            >>> # Example 3: Mixed input for handling large datasets to avoid memory overload
-            >>> # A mix of CSV and directory input for different modalities, useful for larger datasets that would be memory-intensive.
-            >>> from scmidas.model import MIDAS
-            >>> from scmidas.config import load_config
-            >>> configs = load_config()
-            >>> dims_x = {'mod1':[200], 'mod2':[200], 'mod3':[100, 200, 300]}
-            >>> data = [{'rna':'rna.csv', 'adt':'adt.csv', 'atac':'./atac/'}]  # Combining CSV files for RNA and ADT with directory for ATAC
-            >>> mask = [{'rna':'rna_mask.csv', 'adt':'adt_mask.csv'}]  # Masks are still provided as CSV files
-            >>> transform = {'atac':'binarize'}
-            >>> datasets, dims_s, s_joint, combs = MIDAS.configure_data_from_csv(data, mask, transform)
-            >>> model = MIDAS.configure_data(configs, datasets, dims_x, dims_s, s_joint, combs)
-            # This example handles mixed input types and is designed to prevent large matrices from being fully loaded into memory.
         """
         s_joint = []  # Modality indices for each batch
         n_s = {}  # Counter for each modality
@@ -1710,10 +1667,11 @@ class MIDAS(L.LightningModule):
 
         # Define dimensions for batch correction
         dims_s = {modality: count + 1 for modality, count in n_s.items()}
+        MIDAS.print_info(mask, datasets)
         return datasets, dims_s, s_joint, combs
 
     @staticmethod
-    def print_info(mask: List[Dict[str, str]], datalist: List[Dataset], dims_x: Dict[str, list]):
+    def print_info(mask: List[Dict[str, str]], datalist: List[Dataset]):
         """
         Print summary of mask density and dataset information.
 
@@ -1722,26 +1680,31 @@ class MIDAS(L.LightningModule):
                 List of mask.
             datalist : list
                 List of datasets.
-            dims_x : dict
-                Dictionary of feature dimensions for each modality.
         """
-        mask_values = []
+        
 
         # Calculate mask density for each batch
-        for i, batch_mask in enumerate(mask):
-            batch_summary = {modality.upper(): '-' for modality in dims_x.keys()}
-            for m in datalist[i].mod_dict.keys():
-                batch_summary[m.upper()] = 1
-            for modality, path in batch_mask.items():
-                modality_data = pd.read_csv(path, index_col=0).values
-                batch_summary[modality.upper()] = modality_data.sum() / modality_data.shape[1]
-            mask_values.append(batch_summary)
 
-        # Convert mask density summary to DataFrame
-        mask_values = pd.DataFrame(mask_values)
-        mask_values.index = [f'BATCH {i}' for i in range(len(mask_values))]
-        mask_values['#Cell'] = [len(dataset) for dataset in datalist]
-
+        feature = []
+        valid_feature = []
+        for i, dataset in enumerate(datalist):
+            s1 = {}
+            s2 = {}
+            dataset = dataset[0]
+            mask_ = mask[i]
+            for m in dataset['x']:
+                s1['#%s'%m.upper()] = len(dataset['x'][m])
+                if m in mask_:
+                    t = pd.read_csv(mask_[m], index_col=0).values
+                    s2['#VALID_'+m.upper()] = t.sum()
+            feature.append(s1)
+            valid_feature.append(s2)
+        valid_feature = pd.DataFrame(valid_feature)
+        valid_feature.index = [f'BATCH {i}' for i in range(len(valid_feature))]
+        cell_number = pd.DataFrame({'#CELL':[len(dataset) for dataset in datalist]})
+        cell_number.index = [f'BATCH {i}' for i in range(len(cell_number))]
+        feature = pd.DataFrame(feature)
+        feature.index = [f'BATCH {i}' for i in range(len(feature))]
+        data = pd.concat([cell_number, feature, valid_feature], axis=1)
         # Print summary
-        logging.info('Input Summary (Mask Density and Number)')
-        logging.info('\n' + mask_values.to_string())
+        logging.info('Input data: \n' + data.to_string())

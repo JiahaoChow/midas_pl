@@ -2,7 +2,7 @@ API
 ===
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
    scmidas.config
    scmidas.model

@@ -18,7 +18,7 @@ conda activate scmidas
 
 ## Step 2: Install scmidas
 
-Option 1: Install via pip
+**Option 1: Install via pip**
 
 Use `pip` to install the package:
 

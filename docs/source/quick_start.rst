@@ -165,6 +165,21 @@ This function will load and return the predicted results, which can then be used
 Visualize the Training Process
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+First, you should pass a logger into the model:
+
+.. code-block:: python
+
+    # Initialize TensorBoard logging
+    tb_logger = pl_loggers.TensorBoardLogger(
+        save_dir='./logs/', 
+        version='task_version'  # Replace with a descriptive version name
+    )
+
+    # Configure the trainer for single-device training
+    trainer = L.Trainer(
+        logger=tb_logger,              # Attach the logger
+    )
+
 To monitor the training progress, run the following command in your terminal:
 
 .. code-block:: python
