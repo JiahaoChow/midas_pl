@@ -11,5 +11,5 @@ To enable training on multiple GPUs, create a ``.py`` file and modify the ``stra
     )
 
 .. note::
-    1. Set `devices=auto`` to utilize all available GPUs automatically. Alternatively, specify the exact number of GPUs by setting ``devices=n`` (for n GPUs).
+    1. Set ``devices=auto`` to utilize all available GPUs automatically. Alternatively, specify the exact number of GPUs by setting ``devices=n`` (for n GPUs).
     2. Use ``ddp`` for multi-GPU training on a single node.
