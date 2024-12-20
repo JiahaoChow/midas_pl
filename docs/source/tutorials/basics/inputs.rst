@@ -40,7 +40,7 @@ To specify mask files, provide the paths in the format below:
 
 .. code-block:: python
 
-    mask = [
+    mask_config = [
         {'rna': 'batch_1_rna_mask.csv', 'adt': 'batch_1_adt_mask.csv'},
         {'rna': 'batch_2_rna_mask.csv', 'adt': 'batch_2_adt_mask.csv'},
         {'rna': 'batch_3_rna_mask.csv', 'adt': 'batch_3_adt_mask.csv'}
@@ -158,7 +158,7 @@ Integrate the configurations, data paths, and transformations to set up MIDAS:
 .. code-block:: python    
 
     # Configure MIDAS with the data
-    datasets, dims_s, s_joint, combs = MIDAS.configure_data_from_csv(data, mask, transform)
+    datasets, dims_s, s_joint, combs = MIDAS.configure_data_from_csv(data_config, mask_config, transform)
     model = MIDAS.configure_data(configs, datasets, dims_x, dims_s, s_joint, combs)
 
 Approach 2: Loading Data from Multi-level Directories
