@@ -15,3 +15,4 @@ src/scmidas/lightning_logs
 src/scmidas/figs
 src/scmidas/connect
 scr/scmidas/pyWNN.py
+!docs/source/requirements.txt
