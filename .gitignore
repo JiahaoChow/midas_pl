@@ -1,0 +1,17 @@
+bin
+dataset
+LICENSE
+pyproject.toml
+requirements.txt
+dist
+tests
+logs/
+src/scmidas.egg-info
+docs/build
+saved_models
+predict
+src/scmidas/__pycache__
+src/scmidas/lightning_logs
+src/scmidas/figs
+src/scmidas/connect
+scr/scmidas/pyWNN.py
